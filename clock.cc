@@ -51,7 +51,7 @@ void updateCalendar(int x, int y) {
   // print
   rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
 
-  strftime(buffer,80,"%e/%m",timeinfo);
+  strftime(buffer,80,"%e",timeinfo);
   // print
   rgb_matrix::DrawText(matrix, font4x6, x + 13, y + font4x6.baseline(), red, &blank, buffer); 
 }
