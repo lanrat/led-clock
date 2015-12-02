@@ -62,14 +62,14 @@ void updateMuni(int x, int y) {
 
   if (eta.N.size() > 0) {
     oss << "N" << eta.N[0];
-    if (eta.N.size() > 1) {
+    if (eta.N.size() > 1 && eta.N[1] < 60) {
       oss << "," << eta.N[1];
     }
 
   }
   if (eta.NX.size() > 0) {
     oss << " NX" << eta.NX[0];
-    if (eta.NX.size() > 1) {
+    if (eta.NX.size() > 1 && eta.NX[1] < 60) {
       oss << "," << eta.NX[1];
     }
   }
