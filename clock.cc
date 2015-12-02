@@ -73,6 +73,7 @@ void updateMuni(int x, int y) {
       oss << "," << eta.NX[1];
     }
   }
+  oss << "  ";
   // print
   rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, oss.str().c_str()); 
 }
