@@ -15,8 +15,8 @@ default: clock
 $(RGB_LIBRARY): FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-clock: http.cc muni.cc clock.cc $(RGB_LIBRARY)
-	$(CXX) -I$(RGB_INCDIR) $(CXXFLAGS) http.cc muni.cc clock.cc -o $@ $(LDFLAGS)
+clock: http.cc http.h muni.cc muni.h brightness.cc brightness.h clock.cc $(RGB_LIBRARY)
+	$(CXX) -I$(RGB_INCDIR) $(CXXFLAGS) http.cc muni.cc brightness.cc clock.cc -o $@ $(LDFLAGS)
 
 test: test.cc $(RGB_LIBRARY)
 	$(CXX) -I$(RGB_INCDIR) $(CXXFLAGS) test.cc -o $@ $(LDFLAGS)
