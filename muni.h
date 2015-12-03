@@ -2,7 +2,7 @@
 #define MUNI_H
 
 struct  muniETA {
-    std::vector<int> N;
+    std::vector<int> N; // includes N_OWL
     std::vector<int> NX;
 };
 

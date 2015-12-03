@@ -12,9 +12,10 @@
 
 static auto URL_N = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N&s=5200";
 static auto URL_NX = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=NX&s=5200";
-
+static auto URL_N_OWL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N_OWL&s=5200";
 static CURL *connN;
 static CURL *connNX;
+static CURL *connN_OWL;
 
 std::vector<int> parseMuniXML(std::string &buffer) {
     xmlDocPtr doc;
@@ -72,8 +73,6 @@ std::vector<int> parseMuniXML(std::string &buffer) {
 
     xmlFreeDoc(doc);
 
-
-
     sort(eta.begin(), eta.end());
 
     return eta;
@@ -99,6 +98,11 @@ void muniInit()
         fprintf(stderr, "Connection initializion failed\n");
         exit(1);
     }
+    if (!curlInit(connN_OWL, URL_N_OWL))
+    {
+        fprintf(stderr, "Connection initializion failed\n");
+        exit(1);
+    }
 }
 
 muniETA muniRun()
@@ -116,10 +120,21 @@ muniETA muniRun()
         fprintf(stderr, "Failed to get '%s' [%s]\n", URL_NX, httpErrorBuffer);
     }
 
+    static std::string bufferN_OWL;
+    if (!curlRun(connNX, &bufferN_OWL))
+    {
+        fprintf(stderr, "Failed to get '%s' [%s]\n", URL_N_OWL, httpErrorBuffer);
+    }
+
     muniETA eta;
 
-    eta.N = parseMuniXML(bufferN);
+    auto N_OWL = parseMuniXML(bufferN_OWL);
+    auto N = parseMuniXML(bufferN);
     eta.NX = parseMuniXML(bufferNX);
+
+    // merge N and N_OWL
+    eta.N.resize(N.size() + N_OWL.size());
+    merge(N.begin(), N.end(), N_OWL.begin(), N_OWL.end(), eta.N.begin());
 
     return eta;
 }
