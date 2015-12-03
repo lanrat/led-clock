@@ -8,6 +8,7 @@
 #include "led-matrix.h"
 #include "graphics.h"
 #include "muni.h"
+#include "brightness.h"
 
 
 rgb_matrix::RGBMatrix *matrix;
@@ -106,12 +107,30 @@ void updateMuni(int x, int y) {
   muniCleanup();
 }
 
+void updateBrightness()
+{
+  brightnessInit(27);
+  unsigned char b;
+
+  while (true) {
+    b = brightnessGet();
+
+    //printf("Updating brightness to %d\n", b);
+    // TODO force redraw to adjust brightness
+    // allow for redraw without calculations
+    red = rgb_matrix::Color(b, 0, 0);
+
+    sleep(10);
+  }
+}
+
 void run() {
   matrix->Clear();
 
   std::thread clockThread(updateClock, 0, 0);
   std::thread calendarThread(updateCalendar, 0, font6x10.height());
   std::thread muniThread(updateMuni, 32, font6x10.height());
+  std::thread brightnessThread(updateBrightness);
 
   while (true)
   {
