@@ -82,6 +82,7 @@ void updateMuni(int x, int y) {
 
 
 void run() {
+  matrix->Clear();
   for (;;) {
     updateClock(0,0);
 
@@ -91,6 +92,14 @@ void run() {
 
     usleep(5 * 1000000);
   }
+}
+
+void showLoading()
+{
+  matrix->SetPixel(0, 0, 255, 0, 0);
+  matrix->SetPixel(0, 1, 255, 0, 0);
+  matrix->SetPixel(1, 0, 255, 0, 0);
+  matrix->SetPixel(1, 1, 255, 0, 0);
 }
 
 int main(int argc, char *argv[]) {
@@ -111,9 +120,10 @@ int main(int argc, char *argv[]) {
     int parallel = 1; // Number of chains (must be 1 on origional Pi)
     matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
     
-    printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
+    //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
     printf("w: %d, h: %d, T: %d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
 
+    showLoading();
     initFonts();
     printf("Fonts loaded\n");
 
