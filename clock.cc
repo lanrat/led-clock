@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <cstdio>
 #include <sstream>
+#include <thread>
 
 #include "led-matrix.h"
 #include "graphics.h"
@@ -14,12 +15,6 @@ rgb_matrix::Font font6x10;
 rgb_matrix::Font font4x6;
 auto red = rgb_matrix::Color(255, 0, 0);
 auto blank = rgb_matrix::Color(0, 0, 0);
-
-
-// clock vars
-time_t rawtime;
-struct tm * timeinfo;
-
 
 static void initFonts() {
     if (!font6x10.LoadFont("matrix/fonts/6x10.bdf")) {
@@ -34,64 +29,95 @@ static void initFonts() {
 
 void updateClock(int x, int y) {
   static char buffer[80];
-  // update var
-  time (&rawtime);
-  // convert to string
-  timeinfo = localtime(&rawtime);
-  // format
-  strftime(buffer,80,"%H:%M",timeinfo);
-  // print
-  rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, buffer);
+  static time_t rawtime;
+  static struct tm * timeinfo;
+
+  while (true)
+  {
+    // update var
+    time (&rawtime);
+    // convert to string info
+    timeinfo = localtime(&rawtime);
+    // format
+    strftime(buffer,80,"%H:%M:%S",timeinfo);
+    // print
+    rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, buffer);
+
+    usleep(0.5 * 1000000);
+  }
 }
 
 void updateCalendar(int x, int y) {
   static char buffer[80];
-  // format
-  strftime(buffer,80,"%a",timeinfo);
-  // print
-  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
+  static time_t rawtime;
+  static struct tm * timeinfo;
 
-  strftime(buffer,80,"%e",timeinfo);
-  // print
-  rgb_matrix::DrawText(matrix, font4x6, x + 13, y + font4x6.baseline(), red, &blank, buffer); 
+  while (true)
+  {
+    // update var
+    time (&rawtime);
+    // convert to string info
+    timeinfo = localtime(&rawtime);
+    // format
+    strftime(buffer,80,"%a",timeinfo);
+    // print
+    rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
+
+    strftime(buffer,80,"%e",timeinfo);
+    // print
+    rgb_matrix::DrawText(matrix, font4x6, x + 13, y + font4x6.baseline(), red, &blank, buffer);
+
+    // TODO sleeo until time to change date
+    usleep(60 * 1000000);
+  }
 }
 
 void updateMuni(int x, int y) {
-  muniETA eta = muniRun();
+  muniInit();
   std::ostringstream oss;
 
-  if (eta.N.size() > 0) {
-    oss << "N" << eta.N[0];
-    if (eta.N.size() > 1 && eta.N[1] < 60) {
-      oss << "," << eta.N[1];
-    }
+  while (true)
+  {
+    muniETA eta = muniRun();
+    oss.str("");
+    oss.clear();
 
-  }
-  if (eta.NX.size() > 0) {
-    oss << " NX" << eta.NX[0];
-    if (eta.NX.size() > 1 && eta.NX[1] < 60) {
-      oss << "," << eta.NX[1];
+    if (eta.N.size() > 0) {
+      oss << "N" << eta.N[0];
+      if (eta.N.size() > 1 && eta.N[1] < 60) {
+        oss << "," << eta.N[1];
+      }
+
     }
+    if (eta.NX.size() > 0) {
+      oss << " NX" << eta.NX[0];
+      if (eta.NX.size() > 1 && eta.NX[1] < 60) {
+        oss << "," << eta.NX[1];
+      }
+    }
+    oss << "  ";
+    // print
+    rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, oss.str().c_str()); 
+
+    // TODO use epoch time to get moare acurate ETA with less requests
+    usleep(60 * 1000000);
   }
-  oss << "  ";
-  // print
-  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, oss.str().c_str()); 
+
+  muniCleanup();
 }
-
- // look at http://www.riosscheduler.org/ for scheduler example?
-
 
 void run() {
   matrix->Clear();
-  for (;;) {
-    updateClock(0,0);
 
-    updateCalendar(0,font6x10.height());
+  std::thread clockThread(updateClock, 0, 0);
+  std::thread calendarThread(updateCalendar, 0, font6x10.height());
+  std::thread muniThread(updateMuni, 32, font6x10.height());
 
-    updateMuni(34,font6x10.height());
-
-    usleep(5 * 1000000);
+  while (true)
+  {
+    usleep(1000000);
   }
+
 }
 
 void showLoading()
@@ -121,17 +147,13 @@ int main(int argc, char *argv[]) {
     matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
     
     //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
-    printf("w: %d, h: %d, T: %d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
+    printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
 
     showLoading();
     initFonts();
     printf("Fonts loaded\n");
 
-    muniInit();
-
     run();
-
-    muniCleanup();
 
     delete matrix;
     return 0;
