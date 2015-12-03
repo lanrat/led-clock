@@ -7,6 +7,7 @@ RGB_LIBRARY=$(RGB_LIBDIR)/lib$(RGB_LIBRARY_NAME).a
 LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread
 
 LDFLAGS+=`curl-config --cflags --libs` `xml2-config --cflags --libs`
+LDFLAGS+="-lwiringPi"
 
 
 default: clock
@@ -19,6 +20,9 @@ clock: http.cc muni.cc clock.cc $(RGB_LIBRARY)
 
 test: test.cc $(RGB_LIBRARY)
 	$(CXX) -I$(RGB_INCDIR) $(CXXFLAGS) test.cc -o $@ $(LDFLAGS)
+
+photo: photo.c
+	$(CXX) $(CXXFLAGS) photo.c -o $@ $(LDFLAGS)
 
 FORCE:
 .PHONY: FORCE
