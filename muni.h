@@ -1,3 +1,5 @@
+#ifndef MUNI_H
+#define MUNI_H
 
 struct  muniETA {
     std::vector<int> N;
@@ -9,3 +11,5 @@ void muniInit();
 muniETA muniRun();
 
 void muniCleanup();
+
+#endif

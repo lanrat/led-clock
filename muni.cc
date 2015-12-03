@@ -10,11 +10,11 @@
 #include "muni.h"
 
 
-auto URL_N = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N&s=5200";
-auto URL_NX = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=NX&s=5200";
+static auto URL_N = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N&s=5200";
+static auto URL_NX = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=NX&s=5200";
 
-CURL *connN;
-CURL *connNX;
+static CURL *connN;
+static CURL *connNX;
 
 std::vector<int> parseMuniXML(std::string &buffer) {
     xmlDocPtr doc;
