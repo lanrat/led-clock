@@ -127,7 +127,7 @@ void updateBrightness()
 void run() {
   matrix->Clear();
 
-  std::thread clockThread(updateClock, 0, 0);
+  std::thread clockThread(updateClock, 0, -1);
   std::thread calendarThread(updateCalendar, 0, font6x10.height());
   std::thread muniThread(updateMuni, 32, font6x10.height());
   std::thread brightnessThread(updateBrightness);
