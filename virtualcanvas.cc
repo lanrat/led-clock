@@ -12,7 +12,7 @@ VirtualCanvas::VirtualCanvas(int rows, int cols): rows(rows), cols(cols) {
 void VirtualCanvas::SetPixel(int x, int y,
                                      uint8_t red, uint8_t green, uint8_t blue){
     const auto index = y * cols + x;
-    if (index < rows * cols) {
+    if (index >= 0 && index < rows * cols) {
         buffer[index] = red;
     }
 }
