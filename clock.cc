@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
     /*
      * Set up GPIO pins. This fails when not running as root.
      */
-    const auto debug = argc >= 1 && std::string(argv[1]) == "debug";
+    const auto debug = argc > 1 && std::string(argv[1]) == "debug";
     if (!debug) {
         rgb_matrix::GPIO io;
         if (!io.Init()) {
