@@ -33,10 +33,10 @@ clock: http.o muni.o brightness.o clock.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o muni.o brightness.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
-	$(CXX) $(CXXFLAGS) test.cc -o $@ $(RGB_FLAGS)
+	$(CXX) $(CXXFLAGS) test.cc -o $@ $(RGB_LD_FLAGS)
 
 photo: photo.c
-	$(CXX) $(CXXFLAGS) photo.c -o $@ $(GPIO_FLAGS)
+	$(CXX) $(CXXFLAGS) photo.c -o $@ $(GPIO_LD_FLAGS)
 
 clean:
 	rm -f brightness.o http.o muni.o clock photo test

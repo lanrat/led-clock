@@ -22,9 +22,9 @@ int photo(int pin)
 
 int main(void)
 {
-    wiringPiSetupGpio() ;
+    wiringPiSetupPhys();
     for (;;)
     {
-        printf("%d\n", photo(27));
+        printf("%d\n", photo(13));
     }
 }
