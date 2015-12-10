@@ -143,6 +143,7 @@ void run(bool debug) {
   std::thread weatherThread(updateWeather, 50, 0);
   if (!debug){
       std::thread brightnessThread(updateBrightness);
+      brightnessThread.detach();
   }
 
   while (true)
