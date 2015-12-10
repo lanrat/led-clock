@@ -40,7 +40,7 @@ void weatherInit(){
 }
 
 string weatherRun(){
-    static std::string buffer(16384, 0);
+    static std::string buffer;
     /*
     const int TORNADO = 0;
     const int TROPICAL_STORM = 1;
