@@ -9,7 +9,7 @@ static int pin;
 void brightnessInit(int p)
 {
     pin = p;
-    wiringPiSetupGpio();
+    wiringPiSetupPhys();
 }
 
 int brightnessSample()

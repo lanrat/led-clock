@@ -109,7 +109,7 @@ void updateMuni(int x, int y) {
 
 void updateBrightness()
 {
-  brightnessInit(27);
+  brightnessInit(13);
   unsigned char b;
 
   while (true) {
