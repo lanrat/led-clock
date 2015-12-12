@@ -8,10 +8,11 @@
 #include "led-matrix.h"
 #include "graphics.h"
 #include "muni.h"
+#include "weather.h"
 #include "brightness.h"
+#include "virtualcanvas.h"
 
-
-rgb_matrix::RGBMatrix *matrix;
+rgb_matrix::Canvas *matrix;
 rgb_matrix::Font font6x10;
 rgb_matrix::Font font4x6;
 auto red = rgb_matrix::Color(255, 0, 0);
@@ -73,6 +74,15 @@ void updateCalendar(int x, int y) {
   }
 }
 
+void updateWeather(int x, int y){
+    weatherInit();
+    while (true){
+        const auto weather = weatherRun();
+        rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, weather.c_str());
+        usleep(60 * 1000000);
+    }
+}
+
 void updateMuni(int x, int y) {
   muniInit();
   std::ostringstream oss;
@@ -124,16 +134,24 @@ void updateBrightness()
   }
 }
 
-void run() {
+void run(bool debug) {
   matrix->Clear();
 
-  std::thread clockThread(updateClock, 0, 0);
+  std::thread clockThread(updateClock, 0, -1);
   std::thread calendarThread(updateCalendar, 0, font6x10.height());
   std::thread muniThread(updateMuni, 32, font6x10.height());
-  std::thread brightnessThread(updateBrightness);
+  std::thread weatherThread(updateWeather, 50, 0);
+  if (!debug){
+      std::thread brightnessThread(updateBrightness);
+      brightnessThread.detach();
+  }
 
   while (true)
   {
+      if (debug){
+          ((VirtualCanvas*)matrix)->Show();
+      }
+
     usleep(1000000);
   }
 
@@ -151,28 +169,32 @@ int main(int argc, char *argv[]) {
     /*
      * Set up GPIO pins. This fails when not running as root.
      */
-    rgb_matrix::GPIO io;
-    if (!io.Init()) {
-      fprintf(stderr, "Unable to init GPIO\n");
-      return 1;
-    }
+    const auto debug = argc > 1 && std::string(argv[1]) == "debug";
+    if (!debug) {
+        rgb_matrix::GPIO io;
+        if (!io.Init()) {
+            fprintf(stderr, "Unable to init GPIO\n");
+            return 1;
+        }
 
-    /*
-     * Set up the RGBMatrix. It implements a 'Canvas' interface.
-     */
-    int rows = 16;    // A 32x32 display. Use 16 when this is a 16x32 display.
-    int chain = 2;    // Number of boards chained together.
-    int parallel = 1; // Number of chains (must be 1 on origional Pi)
-    matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
-    
-    //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
+        /*
+         * Set up the RGBMatrix. It implements a 'Canvas' interface.
+         */
+        int rows = 16;    // A 32x32 display. Use 16 when this is a 16x32 display.
+        int chain = 2;    // Number of boards chained together.
+        int parallel = 1; // Number of chains (must be 1 on origional Pi)
+        matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
+        //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
+    } else {
+        matrix = new VirtualCanvas(16, 64);
+    }
     printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
 
     showLoading();
     initFonts();
     printf("Fonts loaded\n");
 
-    run();
+    run(debug);
 
     delete matrix;
     return 0;

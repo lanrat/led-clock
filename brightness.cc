@@ -5,6 +5,7 @@
 static int pin;
 
 //static int samples[SAMPLE_SIZE];
+// ref:  https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi/basic-photocell-reading
 
 void brightnessInit(int p)
 {

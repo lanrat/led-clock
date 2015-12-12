@@ -20,6 +20,12 @@ default: clock
 $(RGB_LIBRARY): FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
+virtualcanvas.o: virtualcanvas.cc virtualcanvas.h $(RGB_LIBRARY)
+	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) -c virtualcanvas.cc
+
+weather.o: weather.cc weather.h
+	$(CXX) $(CXXFLAGS) $(XML_INC_FLAGS) -c weather.cc
+
 brightness.o: brightness.cc brightness.h
 	$(CXX) $(CXXFLAGS) -c brightness.cc
 
@@ -29,17 +35,17 @@ http.o: http.cc http.h
 muni.o: muni.cc muni.h
 	$(CXX) $(CXXFLAGS) $(XML_INC_FLAGS) -c muni.cc
 
-clock: http.o muni.o brightness.o clock.cc $(RGB_LIBRARY)
-	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o muni.o brightness.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
+clock: http.o muni.o brightness.o weather.o virtualcanvas.o clock.cc $(RGB_LIBRARY)
+	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
-	$(CXX) $(CXXFLAGS) test.cc -o $@ $(RGB_LD_FLAGS)
+	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) test.cc -o $@ $(RGB_LD_FLAGS)
 
 photo: photo.c
 	$(CXX) $(CXXFLAGS) photo.c -o $@ $(GPIO_LD_FLAGS)
 
 clean:
-	rm -f brightness.o http.o muni.o clock photo test
+	rm -f brightness.o http.o muni.o virtualcanvas.o weather.o clock photo test
 
 FORCE:
 .PHONY: FORCE
