@@ -119,7 +119,7 @@ void updateBrightness() {
   while (true) {
     b = brightnessGet();
 
-    printf("Updating brightness to %d\n", b);
+    //printf("Updating brightness to %d\n", b);
     // TODO force redraw to adjust brightness
     // allow for redraw without calculations
     red = rgb_matrix::Color(b, 0, 0);
