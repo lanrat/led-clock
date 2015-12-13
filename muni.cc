@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <cstdlib>
+#include <ctime>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 #include "http.h"
@@ -54,8 +55,8 @@ std::vector<int> parseMuniXML(std::string &buffer) {
                     while (dir != NULL) {
                         if ((!xmlStrcmp(dir->name, (const xmlChar *)"prediction"))){
 
-                            key = xmlGetProp(dir, (xmlChar*)"minutes");
-                            eta.push_back(atoi((const char *)key));
+                            key = xmlGetProp(dir, (xmlChar*)"seconds");
+                            eta.push_back(time(NULL) + atoi((const char *)key));
                             xmlFree(key);
 
                         }
@@ -144,6 +145,7 @@ void muniCleanup()
     xmlCleanupParser();
     curlCleanup(connN);
     curlCleanup(connNX);
+    curlCleanup(connN_OWL);
 }
 
 /*

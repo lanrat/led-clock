@@ -2,9 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <cstdio>
-#include <sstream>
 #include <thread>
-
 #include "led-matrix.h"
 #include "graphics.h"
 #include "muni.h"
@@ -24,47 +22,11 @@ static bool debug = false;
 static void initFonts() {
   if (!font6x10.LoadFont("matrix/fonts/6x10.bdf")) {
     fprintf(stderr, "Couldn't load font\n");
-    return;
+    exit(1);
   }
   if (!font4x6.LoadFont("matrix/fonts/4x6.bdf")) {
     fprintf(stderr, "Couldn't load font\n");
-    return;
-  }
-}
-
-
-static char clockBuffer[BUFFER_SIZE];
-void updateClock() {
-  static time_t rawtime;
-  static struct tm * timeinfo;
-
-  while (true) {
-    // update var
-    time (&rawtime);
-    // convert to string info
-    timeinfo = localtime(&rawtime);
-    // format
-    strftime(clockBuffer,BUFFER_SIZE,"%H:%M:%S",timeinfo);
-
-    usleep(0.5 * 1000000);
-  }
-}
-
-static char calendarBuffer[BUFFER_SIZE];
-void updateCalendar() {
-  static time_t rawtime;
-  static struct tm * timeinfo;
-
-  while (true) {
-    // update var
-    time (&rawtime);
-    // convert to string info
-    timeinfo = localtime(&rawtime);
-    // format
-    strftime(calendarBuffer,BUFFER_SIZE,"%a %e ",timeinfo);
-
-    // TODO sleep until time to change date
-    usleep(60 * 1000000);
+    exit(1);
   }
 }
 
@@ -78,35 +40,13 @@ void updateWeather(){
   }
 }
 
-const static char * muniBuffer;
+static muniETA eta;
 void updateMuni() {
   muniInit();
-  std::ostringstream oss;
 
-  while (true)
-  {
-    muniETA eta = muniRun();
-    oss.str("");
-    oss.clear();
-
-    if (eta.N.size() > 0) {
-      oss << "N" << eta.N[0];
-      if (eta.N.size() > 1 && eta.N[1] < 60) {
-        oss << "," << eta.N[1];
-      }
-
-    }
-    if (eta.NX.size() > 0) {
-      oss << " NX" << eta.NX[0];
-      if (eta.NX.size() > 1 && eta.NX[1] < 60) {
-        oss << "," << eta.NX[1];
-      }
-    }
-    oss << "  ";
-    muniBuffer = oss.str().c_str(); 
-
-    // TODO use epoch time to get moare acurate ETA with less requests
-    usleep(60 * 1000000);
+  while (true) {
+    eta = muniRun();
+    usleep(3 * 60 * 1000000);
   }
 
   muniCleanup();
@@ -120,8 +60,6 @@ void updateBrightness() {
     b = brightnessGet();
 
     //printf("Updating brightness to %d\n", b);
-    // TODO force redraw to adjust brightness
-    // allow for redraw without calculations
     red = rgb_matrix::Color(b, 0, 0);
 
     sleep(5);
@@ -130,39 +68,79 @@ void updateBrightness() {
 
 
 void renderClock(int x, int y) {
-  rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, clockBuffer);
-}
+  static char buffer[BUFFER_SIZE];
+  static time_t now;
+  static struct tm * timeinfo;
 
-void renderCalendar(int x, int y) {
-  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, calendarBuffer);
+  // update var
+  time(&now);
+  // convert to string info
+  timeinfo = localtime(&now);
+
+  // clock format
+  strftime(buffer,BUFFER_SIZE,"%H:%M",timeinfo);
+  rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, buffer);
+
+  // date format
+  strftime(buffer,BUFFER_SIZE,"%a%e",timeinfo);
+  rgb_matrix::DrawText(matrix, font6x10, x + 32, y + font6x10.baseline(), red, &blank, buffer);
 }
 
 void renderMuni(int x, int y) {
-  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, muniBuffer); 
+  static char buffer[BUFFER_SIZE];
+  static time_t now;
+  unsigned int i;
+  time(&now);
+  //N
+  for (i = 0; i < eta.N.size(); i++) {
+    if (now < eta.N[i]) {
+      break;
+    }
+  }
+  if (eta.N.size() > i) {
+    if ((eta.N.size() > i+1) && (eta.N[i+1] - now < (60 * 60))) {
+      snprintf(buffer, BUFFER_SIZE, "N%ld %ld ", (eta.N[i] - now) / 60, (eta.N[i+1] - now) / 60);
+    }else {
+      snprintf(buffer, BUFFER_SIZE, "N%ld ", (eta.N[i] - now) / 60);
+    }
+    rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
+  }
+  // NX
+  for (i = 0; i < eta.NX.size(); i++) {
+    if (now < eta.NX[i]) {
+      break;
+    }
+  }
+  if (eta.NX.size() > i) {
+    if ((eta.NX.size() > i+1) && (eta.NX[i+1] - now < (60 * 60))) {
+      snprintf(buffer, BUFFER_SIZE, "NX%ld %ld ", (eta.NX[i] - now) / 60, (eta.NX[i+1] - now) / 60);
+    }else {
+      snprintf(buffer, BUFFER_SIZE, "NX%ld ", (eta.NX[i] - now) / 60);
+    }
+  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline() + font4x6.height(), red, &blank, buffer); 
+  }
 }
 
 void renderWeather(int x, int y) {
-  rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, weatherBuffer);
+  if (weatherBuffer) {
+    rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, weatherBuffer);
+  }
 }
 
 void run() {
-  std::thread clockThread(updateClock);
-  std::thread calendarThread(updateCalendar);
   std::thread muniThread(updateMuni);
   std::thread weatherThread(updateWeather);
   if (!debug) {
     std::thread brightnessThread(updateBrightness);
     brightnessThread.detach();
   }
-  sleep(5);
 
   matrix->Clear();
   while (true) {
 
-    renderClock(0, 0);
-    renderCalendar(0, font6x10.height());
-    renderWeather(50, 0);
-    renderMuni(32, font6x10.height());
+    renderClock(0, -1);
+    renderWeather(0, 8);
+    renderMuni(38, 8);
 
     if (debug){
       ((VirtualCanvas*)matrix)->Show();
@@ -202,8 +180,8 @@ int main(int argc, char *argv[]) {
     //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
   } else {
     matrix = new VirtualCanvas(16, 64);
+    printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
   }
-  printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
 
   showLoading(0);
   initFonts();
