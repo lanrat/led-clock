@@ -83,7 +83,7 @@ void renderClock(int x, int y) {
 
   // date format
   strftime(buffer,BUFFER_SIZE,"%a%e",timeinfo);
-  rgb_matrix::DrawText(matrix, font6x10, x + 32, y + font6x10.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(matrix, font6x10, x + 35, y + font6x10.baseline(), red, &blank, buffer);
 }
 
 void renderMuni(int x, int y) {
@@ -117,7 +117,7 @@ void renderMuni(int x, int y) {
     }else {
       snprintf(buffer, BUFFER_SIZE, "NX%ld ", (eta.NX[i] - now) / 60);
     }
-  rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline() + font4x6.height(), red, &blank, buffer); 
+  rgb_matrix::DrawText(matrix, font4x6, x + 20, y + font4x6.baseline(), red, &blank, buffer); 
   }
 }
 
@@ -140,7 +140,7 @@ void run() {
 
     renderClock(0, -1);
     renderWeather(0, 8);
-    renderMuni(38, 10);
+    renderMuni(10, 10);
 
     if (debug){
       ((VirtualCanvas*)matrix)->Show();
