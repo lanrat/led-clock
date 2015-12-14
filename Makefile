@@ -47,5 +47,17 @@ photo: photo.c
 clean:
 	rm -f brightness.o http.o muni.o virtualcanvas.o weather.o clock photo test
 
+start:
+	systemctl start clock.service
+
+stop:
+	systemctl stop clock.service
+
+install: clock.service
+	ln -f -s /root/led-clock/clock.service /etc/systemd/system/clock.service
+	ln -f -s /etc/systemd/system/clock.service /etc/systemd/system/multi-user.target.wants/clock.service
+	systemctl daemon-reload
+
+
 FORCE:
 .PHONY: FORCE
