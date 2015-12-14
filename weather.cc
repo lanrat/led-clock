@@ -98,7 +98,7 @@ string weatherRun(){
     }
     const int code = parseWeather(buffer);
     if (code <= 18 || (code >= 37 && code <= 43) || (code >= 45 && code <= 47)) { return "R"; }
-    else if ((code >= 26 && code < 30) || code == 44 ) { return "C"; }
+    else if ((code >= 26 && code <= 30) || code == 44 ) { return "C"; }
     else if (code == 20) { return "F"; }
     else if (code == 23 || code == 24) { return "W"; }
     else if (code == 32) { return "S"; }
