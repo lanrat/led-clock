@@ -102,6 +102,7 @@ string weatherRun(){
     else if (code == 20) { return "F"; }
     else if (code == 23 || code == 24) { return "W"; }
     else if (code == 32) { return "S"; }
+    else if (code == 33 || code == 34) { return "OK"; }
     else if (code == 36) { return "H"; }
-    else { return "U"; }
+    else { return to_string(code); } 
 }

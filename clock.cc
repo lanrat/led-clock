@@ -140,7 +140,7 @@ void run() {
 
     renderClock(0, -1);
     renderWeather(0, 8);
-    renderMuni(10, 10);
+    renderMuni(16, 10);
 
     if (debug){
       ((VirtualCanvas*)matrix)->Show();
