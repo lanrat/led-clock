@@ -5,6 +5,6 @@
 
 void brightnessInit(int p);
 
-unsigned char brightnessGet();
+int brightnessGet();
 
 #endif

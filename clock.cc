@@ -55,9 +55,17 @@ void updateMuni() {
 void updateBrightness() {
   brightnessInit(13);
   unsigned char b;
+  int a;
 
   while (true) {
-    b = brightnessGet();
+    a = brightnessGet();
+    if (a < 40000) {
+      b = 200;
+    }else if (a < 100000) {
+      b = 128;
+    }else {
+      b = 64;
+    }
 
     //printf("Updating brightness to %d\n", b);
     red = rgb_matrix::Color(b, 0, 0);

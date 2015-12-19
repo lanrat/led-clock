@@ -31,7 +31,7 @@ int brightnessSample() {
     return reading;
 }
 
-unsigned char brightnessGet() {
+int brightnessGet() {
     int total = 0;
     for (int i = 0; i < SAMPLE_SIZE;  i++) {
         //samples[i] = brightnessSample();
@@ -39,15 +39,6 @@ unsigned char brightnessGet() {
     }
     int avg = total / SAMPLE_SIZE;
 
-    if (avg > 200000) {
-        return 64;
-    }else if (avg > 50000) {
-        return 128;
-    }
-    return 255;
-
-    // bright ~= 400
-    // dark ~= 600000
-    //return 255 - ((avg * 255) / 500000);
+    return avg;
 }
 
