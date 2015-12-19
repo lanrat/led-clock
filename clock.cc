@@ -97,11 +97,12 @@ void renderMuni(int x, int y) {
       break;
     }
   }
+  // TODO erase text when blank
   if (eta.N.size() > i) {
     if ((eta.N.size() > i+1) && (eta.N[i+1] - now < (60 * 60))) {
-      snprintf(buffer, BUFFER_SIZE, "N%ld %ld ", (eta.N[i] - now) / 60, (eta.N[i+1] - now) / 60);
+      snprintf(buffer, BUFFER_SIZE, "N%ld %ld          ", (eta.N[i] - now) / 60, (eta.N[i+1] - now) / 60);
     }else {
-      snprintf(buffer, BUFFER_SIZE, "N%ld ", (eta.N[i] - now) / 60);
+      snprintf(buffer, BUFFER_SIZE, "N%ld             ", (eta.N[i] - now) / 60);
     }
     rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
   }
