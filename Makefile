@@ -35,14 +35,14 @@ http.o: http.cc http.h
 muni.o: muni.cc muni.h
 	$(CXX) $(CXXFLAGS) $(XML_INC_FLAGS) -c muni.cc
 
-clock: http.o muni.o brightness.o weather.o virtualcanvas.o clock.cc $(RGB_LIBRARY)
+clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o clock.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) test.cc -o $@ $(RGB_LD_FLAGS)
 
-photo: photo.c
-	$(CXX) $(CXXFLAGS) photo.c -o $@ $(GPIO_LD_FLAGS)
+photo: photo.c brightness.o
+	$(CXX) $(CXXFLAGS) brightness.o photo.c -o $@ $(GPIO_LD_FLAGS)
 
 clean:
 	rm -f brightness.o http.o muni.o virtualcanvas.o weather.o clock photo test
