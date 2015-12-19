@@ -18,10 +18,19 @@ static CURL *connN;
 static CURL *connNX;
 static CURL *connN_OWL;
 
-std::vector<int> parseMuniXML(std::string &buffer) {
+
+static bool eta_cmp(const arrivalETA& a, const arrivalETA& b)
+{
+    // smallest comes first
+    return a.eta < b.eta;
+}
+
+static std::vector<time_t> parseMuniXML(std::string &buffer) {
     xmlDocPtr doc;
     xmlNodePtr cur;
-    std::vector<int> eta;
+    std::vector<time_t> eta;
+    time_t now;
+    time(&now);
 
     doc = xmlParseMemory (buffer.c_str(), buffer.size());
     if (doc == NULL) {
@@ -56,7 +65,7 @@ std::vector<int> parseMuniXML(std::string &buffer) {
                         if ((!xmlStrcmp(dir->name, (const xmlChar *)"prediction"))){
 
                             key = xmlGetProp(dir, (xmlChar*)"seconds");
-                            eta.push_back(time(NULL) + atoi((const char *)key));
+                            eta.push_back(now + atoi((const char *)key));
                             xmlFree(key);
 
                         }
@@ -73,8 +82,6 @@ std::vector<int> parseMuniXML(std::string &buffer) {
     }
 
     xmlFreeDoc(doc);
-
-    sort(eta.begin(), eta.end());
 
     return eta;
 }
@@ -127,15 +134,22 @@ muniETA muniRun()
         fprintf(stderr, "Failed to get '%s' [%s]\n", URL_N_OWL, httpErrorBuffer);
     }
 
+    auto N = parseMuniXML(bufferN);
+    auto NX = parseMuniXML(bufferNX);
+    auto N_OWL = parseMuniXML(bufferN_OWL);
     muniETA eta;
 
-    auto N_OWL = parseMuniXML(bufferN_OWL);
-    auto N = parseMuniXML(bufferN);
-    eta.NX = parseMuniXML(bufferNX);
+    for(auto it = N.begin(); it != N.end(); ++it) {
+        eta.push_back((arrivalETA){*it,1});
+    }
+    for(auto it = NX.begin(); it != NX.end(); ++it) {
+        eta.push_back((arrivalETA){*it,2});
+    }
+    for(auto it = N_OWL.begin(); it != N_OWL.end(); ++it) {
+        eta.push_back((arrivalETA){*it,3});
+    }
 
-    // merge N and N_OWL
-    eta.N.resize(N.size() + N_OWL.size());
-    merge(N.begin(), N.end(), N_OWL.begin(), N_OWL.end(), eta.N.begin());
+    std::sort(eta.begin(), eta.end(), eta_cmp);
 
     return eta;
 }
@@ -147,15 +161,3 @@ void muniCleanup()
     curlCleanup(connNX);
     curlCleanup(connN_OWL);
 }
-
-/*
-int main(int argc, char *argv[])
-{
-    muniInit();
-
-    // loop this
-    muniRun();
-
-    muniCleanup();
-    return 0;
-}*/

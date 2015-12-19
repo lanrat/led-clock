@@ -11,20 +11,17 @@
 #include "virtualcanvas.h"
 
 rgb_matrix::Canvas *matrix;
-rgb_matrix::Font font6x10;
-rgb_matrix::Font font4x6;
-auto red = rgb_matrix::Color(255, 0, 0);
+rgb_matrix::Font mainFont;
+
+unsigned char brightness = 255;
+auto red = rgb_matrix::Color(brightness, 0, 0);
 auto blank = rgb_matrix::Color(0, 0, 0);
 static bool debug = false;
 
 #define BUFFER_SIZE 80 
 
 static void initFonts() {
-  if (!font6x10.LoadFont("matrix/fonts/6x10.bdf")) {
-    fprintf(stderr, "Couldn't load font\n");
-    exit(1);
-  }
-  if (!font4x6.LoadFont("matrix/fonts/4x6.bdf")) {
+  if (!mainFont.LoadFont("matrix/fonts/6x10.bdf")) {
     fprintf(stderr, "Couldn't load font\n");
     exit(1);
   }
@@ -54,21 +51,19 @@ void updateMuni() {
 
 void updateBrightness() {
   brightnessInit(13);
-  unsigned char b;
   int a;
 
   while (true) {
     a = brightnessGet();
     if (a < 40000) {
-      b = 200;
+      brightness = 200;
     }else if (a < 100000) {
-      b = 128;
+      brightness = 128;
     }else {
-      b = 64;
+      brightness = 64;
     }
 
-    //printf("Updating brightness to %d\n", b);
-    red = rgb_matrix::Color(b, 0, 0);
+    red = rgb_matrix::Color(brightness, 0, 0);
 
     sleep(5);
   }
@@ -87,11 +82,11 @@ void renderClock(int x, int y) {
 
   // clock format
   strftime(buffer,BUFFER_SIZE,"%H:%M",timeinfo);
-  rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(matrix, mainFont, x, y + mainFont.baseline(), red, &blank, buffer);
 
   // date format
   strftime(buffer,BUFFER_SIZE,"%a%e",timeinfo);
-  rgb_matrix::DrawText(matrix, font6x10, x + 35, y + font6x10.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(matrix, mainFont, x + 35, y + mainFont.baseline(), red, &blank, buffer);
 }
 
 void renderMuni(int x, int y) {
@@ -99,40 +94,30 @@ void renderMuni(int x, int y) {
   static time_t now;
   unsigned int i;
   time(&now);
-  //N
-  for (i = 0; i < eta.N.size(); i++) {
-    if (now < eta.N[i]) {
+
+  // skip past times and 0 min
+  for (i = 0; i < eta.size(); i++) {
+    // add 30 secconds to now to reduce 0min etas
+    if (now < (eta[i].eta - 30)) {
       break;
     }
   }
-  // TODO erase text when blank
-  if (eta.N.size() > i) {
-    if ((eta.N.size() > i+1) && (eta.N[i+1] - now < (60 * 60))) {
-      snprintf(buffer, BUFFER_SIZE, "N%ld %ld          ", (eta.N[i] - now) / 60, (eta.N[i+1] - now) / 60);
-    }else {
-      snprintf(buffer, BUFFER_SIZE, "N%ld             ", (eta.N[i] - now) / 60);
+
+  for (int j = 0; (j < 3) && (j + i) < eta.size();  j++) {
+    // draw symbol
+    for (int k = 0;  k < eta[i+j].route; k++) {
+      matrix->SetPixel(x, y+k+1, brightness/2, 0, 0);
+
     }
-    rgb_matrix::DrawText(matrix, font4x6, x, y + font4x6.baseline(), red, &blank, buffer);
-  }
-  // NX
-  for (i = 0; i < eta.NX.size(); i++) {
-    if (now < eta.NX[i]) {
-      break;
-    }
-  }
-  if (eta.NX.size() > i) {
-    if ((eta.NX.size() > i+1) && (eta.NX[i+1] - now < (60 * 60))) {
-      snprintf(buffer, BUFFER_SIZE, "NX%ld %ld ", (eta.NX[i] - now) / 60, (eta.NX[i+1] - now) / 60);
-    }else {
-      snprintf(buffer, BUFFER_SIZE, "NX%ld ", (eta.NX[i] - now) / 60);
-    }
-  rgb_matrix::DrawText(matrix, font4x6, x + 20, y + font4x6.baseline(), red, &blank, buffer); 
+    // draw eta
+    snprintf(buffer, BUFFER_SIZE, "%ld ", (eta[i+j].eta - now) / 60);
+    x = x - 3 + rgb_matrix::DrawText(matrix, mainFont, x+1, y + mainFont.baseline(), red, &blank, buffer);
   }
 }
 
 void renderWeather(int x, int y) {
   if (weatherBuffer) {
-    rgb_matrix::DrawText(matrix, font6x10, x, y + font6x10.baseline(), red, &blank, weatherBuffer);
+    rgb_matrix::DrawText(matrix, mainFont, x, y + mainFont.baseline(), red, &blank, weatherBuffer);
   }
 }
 
@@ -149,7 +134,7 @@ void run() {
 
     renderClock(0, -1);
     renderWeather(0, 8);
-    renderMuni(16, 10);
+    renderMuni(8, 8);
 
     if (debug){
       ((VirtualCanvas*)matrix)->Show();
