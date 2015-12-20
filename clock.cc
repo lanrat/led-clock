@@ -64,9 +64,9 @@ void updateBrightness() {
 
   while (true) {
     a = brightnessGet();
-    if (a < 40000) {
+    if (a < 35000) {
       brightness = 200;
-    }else if (a < 100000) {
+    }else if (a < 90000) {
       brightness = 128;
     }else {
       brightness = 64;
@@ -137,6 +137,7 @@ void updateRecieved(char * out) {
 }
 
 void renderUpdate() {
+  // TODO scroll
   rgb_matrix::DrawText(matrix, updateFont, 0, 1 + updateFont.baseline(), red, &blank, data);
 }
 
