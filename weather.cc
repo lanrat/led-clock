@@ -1,8 +1,10 @@
-#include "http.h"
+
 #include <cstdlib>
 #include <libxml/xmlreader.h>
 #include <libxml/tree.h>
 #include <iostream>
+#include "http.h"
+#include "weather.h"
 
 using namespace std;
 
@@ -41,68 +43,101 @@ void weatherInit(){
 
 string weatherRun(){
     static std::string buffer;
-    /*
-    const int TORNADO = 0;
-    const int TROPICAL_STORM = 1;
-    const int HURRICANE = 2;
-    const int SEVERE_THUNDERSTORMS = 3;
-    const int THUNDERSTORMS = 4;
-    const int MIXED_RAIN_AND_SNOW = 5;
-    const int MIXED_RAIN_AND_SLEET = 6;
-    const int MIXED_SNOW_AND_SLEET = 7;
-    const int FREEZING_DRIZZLE = 8;
-    const int DRIZZLE = 9;
-    const int FREEZING_RAIN = 10;
-    const int SHOWERS = 11;
-    const int SHOWERS_2 = 12;
-    const int SNOW_FLURRIES = 13;
-    const int LIGHT_SNOW_SHOWERS = 14;
-    const int BLOWING_SNOW = 15;
-    const int SNOW = 16;
-    const int HAIL = 17;
-    const int SLEET = 18;
-    const int DUST = 19;
-    const int FOGGY = 20;
-    const int HAZE = 21;
-    const int SMOKY = 22;
-    const int BLUSTERY = 23;
-    const int WINDY = 24;
-    const int COLD = 25;
-    const int CLOUDY = 26;
-    const int MOSTLY_CLOUDY_NIGHT = 27;
-    const int MOSTLY_CLOUDY_DAY = 28;
-    const int PARTLY_CLOUDY_NIGHT = 29;
-    const int PARTLY_CLOUDY_DAY = 30;
-    const int CLEAR_NIGHT = 31;
-    const int SUNNY = 32;
-    const int FAIR_NIGHT = 33;
-    const int FAIR_DAY = 34;
-    const int MIXED_RAIN_AND_HAIL = 35;
-    const int HOT = 36;
-    const int ISOLATED_THUNDERSTORMS = 37;
-    const int SCATTERED_THUNDERSTORMS = 38;
-    const int SCATTERED_THUNDERSTORMS_2 = 39;
-    const int SCATTERED_SHOWERS = 40;
-    const int HEAVY_SNOW = 41;
-    const int SCATTERED_SNOW_SHOWERS = 42;
-    const int HEAVY_SNOW_2 = 43;
-    const int PARTLY_CLOUDY = 44;
-    const int THUNDERSHOWERS = 45;
-    const int SNOW_SHOWERS = 46;
-    const int ISOLATED_THUNDERSHOWERS = 47;
-    const int NOT_AVAILABLE = 3200;
-    */
     if (!curlRun(conn, &buffer))
     {
         fprintf(stderr, "Failed to get '%s' [%s]\n", URL, httpErrorBuffer);
     }
     const int code = parseWeather(buffer);
-    if (code <= 18 || (code >= 37 && code <= 43) || (code >= 45 && code <= 47)) { return "R"; }
-    else if ((code >= 26 && code <= 30) || code == 44 ) { return "C"; }
-    else if (code == 20) { return "F"; }
-    else if (code == 23 || code == 24) { return "W"; }
-    else if (code == 32) { return "S"; }
-    else if (code == 33 || code == 34) { return "O"; }
-    else if (code == 36) { return "H"; }
-    else { return to_string(code); } 
+    string i;
+    switch (code) {
+        case TORNADO:
+        case HURRICANE:
+            i = "H";
+			break;
+        case TROPICAL_STORM:
+        case SEVERE_THUNDERSTORMS:
+        case THUNDERSHOWERS:
+        case ISOLATED_THUNDERSHOWERS:
+        case THUNDERSTORMS:
+            i = "L";
+			break;
+        case MIXED_RAIN_AND_SNOW:
+        case MIXED_RAIN_AND_SLEET:
+        case MIXED_SNOW_AND_SLEET:
+        case MIXED_RAIN_AND_HAIL:
+            i = "R";
+			break;
+        case FREEZING_DRIZZLE:
+        case DRIZZLE:
+            i = "D";
+			break;
+        case FREEZING_RAIN:
+        case SHOWERS:
+        case SHOWERS_2:
+        case SCATTERED_SHOWERS:
+        case SLEET:
+            i = "r";
+			break;
+        case SNOW_FLURRIES:
+        case LIGHT_SNOW_SHOWERS:
+        case BLOWING_SNOW:
+        case HEAVY_SNOW:
+        case SCATTERED_SNOW_SHOWERS:
+        case HEAVY_SNOW_2:
+        case SNOW:
+        case SNOW_SHOWERS:
+            i = "S";
+			break;
+        case HAIL:
+            i = "R";
+			break;
+        case DUST:
+        case FOGGY:
+        case HAZE:
+        case SMOKY:
+            i = "F";
+			break;
+        case BLUSTERY:
+        case WINDY:
+            i = "W";
+			break;
+        case COLD:
+            i = "c";
+			break;
+        case CLOUDY:
+        case PARTLY_CLOUDY:
+            i = "C";
+			break;
+        case MOSTLY_CLOUDY_NIGHT:
+        case PARTLY_CLOUDY_NIGHT:
+            i = "C";
+			break;
+        case MOSTLY_CLOUDY_DAY:
+        case PARTLY_CLOUDY_DAY:
+            i = "C";
+			break;
+        case SUNNY:
+            i = "S";
+			break;
+        case CLEAR_NIGHT:
+        case FAIR_NIGHT:
+            i = "f";
+			break;
+        case FAIR_DAY:
+            i = "f";
+			break;
+        case HOT:
+            i = "h";
+			break;
+        case ISOLATED_THUNDERSTORMS:
+        case SCATTERED_THUNDERSTORMS:
+        case SCATTERED_THUNDERSTORMS_2:
+            i = "L";
+			break;
+        case NOT_AVAILABLE:
+        default:
+            i = "?";
+			break;
+    }
+    return i;
 }
