@@ -1,6 +1,7 @@
 
 /*
  * Yahoo Weather Codes
+ * https://www.igorkromin.net/fp-content/images/photoframe/conditions.png
  */
 #define TORNADO 0
 #define TROPICAL_STORM 1
