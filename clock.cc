@@ -137,8 +137,28 @@ void updateRecieved(char * out) {
 }
 
 void renderUpdate() {
-  // TODO scroll
-  rgb_matrix::DrawText(matrix, updateFont, 0, 1 + updateFont.baseline(), red, &blank, data);
+  matrix->Clear();
+  size_t len = strlen(data);
+  int mw = matrix->width();
+  int dw = updateFont.CharacterWidth('A') * len;
+  if (len <= 7) {
+    // center text
+    int c = (mw - dw) / 2;
+    rgb_matrix::DrawText(matrix, updateFont, c, 1 + updateFont.baseline(), red, &blank, data);
+    sleep(newUpdate);
+  } else {
+    // scroll text
+    unsigned int slept = 0;
+    static const int stepDuration = (0.5 * 1000000 / 8);
+    while (slept < (newUpdate * 1000000)) {
+      for (int i=0;  i < mw+dw; i++) {
+        rgb_matrix::DrawText(matrix, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, data);
+        usleep(stepDuration);
+        slept = slept + stepDuration;
+      }
+    }
+  }
+  matrix->Clear();
 }
 
 void run() {
@@ -154,10 +174,7 @@ void run() {
   while (true) {
 
     if (newUpdate) {
-      matrix->Clear();
       renderUpdate();
-      sleep(newUpdate);
-      matrix->Clear();
       newUpdate = 0;
     }
     
