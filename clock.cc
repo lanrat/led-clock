@@ -182,7 +182,7 @@ void run() {
     renderWeather(0, 8);
     renderMuni(8, 8);
 
-    usleep(1.0 * 1000000);
+    usleep(0.5 * 1000000);
   }
 
 }
