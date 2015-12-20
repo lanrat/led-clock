@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include "server.h"
 
-const static char * HTML = "<html><head><title>LED MATRIX</title></head><body><h1>LED MATRIX</h1><form method=\"GET\"><input type=\"text\" name=\"text\" autofocus/><input type=\"submit\"/></form></body></html>";
+const static char * HTML = "<html><head><title>LED MATRIX</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><link href=\"//maxcdn.bootstrapcdn.com/bootswatch/3.3.4/lumen/bootstrap.min.css\" rel=\"stylesheet\"></head><body><div class=\"container\"><h1>LED MATRIX</h1><form method=\"GET\"><input type=\"text\" name=\"text\" autofocus/><input type=\"submit\"/></form></div></body></html>";
 
 int listenfd, clients[CONNMAX];
 void (*callback)(char*);
