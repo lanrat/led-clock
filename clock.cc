@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 #include <stdio.h>
 #include <cstdio>
 #include <thread>
@@ -9,19 +10,27 @@
 #include "weather.h"
 #include "brightness.h"
 #include "virtualcanvas.h"
+#include "server.h"
 
 rgb_matrix::Canvas *matrix;
 rgb_matrix::Font mainFont;
+rgb_matrix::Font updateFont;
 
 unsigned char brightness = 255;
 auto red = rgb_matrix::Color(brightness, 0, 0);
 auto blank = rgb_matrix::Color(0, 0, 0);
 static bool debug = false;
+char data[SERVER_BUFFER_SIZE];
+static unsigned int newUpdate = 0;
 
 #define BUFFER_SIZE 80 
 
 static void initFonts() {
   if (!mainFont.LoadFont("matrix/fonts/6x10.bdf")) {
+    fprintf(stderr, "Couldn't load font\n");
+    exit(1);
+  }
+  if (!updateFont.LoadFont("matrix/fonts/9x15B.bdf")) {
     fprintf(stderr, "Couldn't load font\n");
     exit(1);
   }
@@ -121,9 +130,20 @@ void renderWeather(int x, int y) {
   }
 }
 
+void updateRecieved(char * out) {
+  strncpy(data, out, SERVER_BUFFER_SIZE);
+  data[SERVER_BUFFER_SIZE-1] = 0;
+  newUpdate = 10;
+}
+
+void renderUpdate() {
+  rgb_matrix::DrawText(matrix, updateFont, 0, 1 + updateFont.baseline(), red, &blank, data);
+}
+
 void run() {
   std::thread muniThread(updateMuni);
   std::thread weatherThread(updateWeather);
+  std::thread serverThread(setupServer, updateRecieved);
   if (!debug) {
     std::thread brightnessThread(updateBrightness);
     brightnessThread.detach();
@@ -132,11 +152,20 @@ void run() {
   matrix->Clear();
   while (true) {
 
+    if (newUpdate) {
+      matrix->Clear();
+      renderUpdate();
+      sleep(newUpdate);
+      matrix->Clear();
+      newUpdate = 0;
+    }
+    
     renderClock(0, -1);
     renderWeather(0, 8);
     renderMuni(8, 8);
 
     if (debug){
+      //TODO move to own thread
       ((VirtualCanvas*)matrix)->Show();
     }
 

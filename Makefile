@@ -35,8 +35,11 @@ http.o: http.cc http.h
 muni.o: muni.cc muni.h
 	$(CXX) $(CXXFLAGS) $(XML_INC_FLAGS) -c muni.cc
 
-clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o clock.cc $(RGB_LIBRARY)
-	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
+server.o: server.cc server.h
+	$(CXX) $(CXXFLAGS) -c server.cc
+
+clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o server.o clock.cc $(RGB_LIBRARY)
+	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o server.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) test.cc -o $@ $(RGB_LD_FLAGS)
