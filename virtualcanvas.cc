@@ -1,12 +1,16 @@
 #include <cstdlib>
-#include "virtualcanvas.h"
 #include <iostream>
+#include <thread>
+#include <unistd.h>
+#include "virtualcanvas.h"
 
 using namespace rgb_matrix;
 using namespace std;
 
-VirtualCanvas::VirtualCanvas(int rows, int cols): rows(rows), cols(cols) {
+VirtualCanvas::VirtualCanvas(int rows, int cols, useconds_t wait): rows(rows), cols(cols) {
     buffer = (char*)malloc(rows * cols);
+    std::thread VirtualCanvasThread(Run, this, wait);
+    VirtualCanvasThread.detach();
 }
 
 void VirtualCanvas::SetPixel(int x, int y,
@@ -40,5 +44,12 @@ void VirtualCanvas::Clear(){
 void VirtualCanvas::Fill(uint8_t red, uint8_t green, uint8_t blue){
     for(auto i = 0; i < rows * cols; i++) {
         buffer[i] = red;
+    }
+}
+
+void VirtualCanvas::Run(VirtualCanvas* canvas, useconds_t wait) {
+    while (true) {
+        canvas->Show();
+        usleep(wait);
     }
 }

@@ -182,11 +182,6 @@ void run() {
     renderWeather(0, 8);
     renderMuni(8, 8);
 
-    if (debug){
-      //TODO move to own thread
-      ((VirtualCanvas*)matrix)->Show();
-    }
-
     usleep(1.0 * 1000000);
   }
 

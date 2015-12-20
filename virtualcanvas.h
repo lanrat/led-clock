@@ -6,9 +6,11 @@ class VirtualCanvas : public rgb_matrix::Canvas {
     int cols;
 
     char* buffer;
+    
+    static void Run(VirtualCanvas* canvas, useconds_t wait);
 
 public:
-    VirtualCanvas(int rows, int cols);
+    VirtualCanvas(int rows, int cols, useconds_t wait = 1000000);
 
     virtual void SetPixel(int x, int y, uint8_t red, uint8_t green, uint8_t blue);
 
