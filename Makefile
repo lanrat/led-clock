@@ -13,6 +13,9 @@ XML_INC_FLAGS=`xml2-config --cflags`
 CURL_LD_FLAGS=`curl-config --libs`
 CURL_INC_FLAGS=`curl-config --cflags`
 
+SNMP_LD_FLAGS=`net-snmp-config --libs`
+SNMP_INC_FLAGS=`net-snmp-config --cflags`
+
 GPIO_LD_FLAGS=-lwiringPi
 
 default: clock
@@ -35,11 +38,14 @@ http.o: http.cc http.h
 muni.o: muni.cc muni.h
 	$(CXX) $(CXXFLAGS) $(XML_INC_FLAGS) -c muni.cc
 
+bandwidth.o: bandwidth.cc bandwidth.h
+	$(CXX) $(CXXFLAGS) $(SNMP_INC_FLAGS) -c bandwidth.cc
+
 server.o: server.cc server.h
 	$(CXX) $(CXXFLAGS) -c server.cc
 
-clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o server.o clock.cc $(RGB_LIBRARY)
-	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o server.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS)
+clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o server.o bandwidth.o clock.cc $(RGB_LIBRARY)
+	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o bandwidth.o server.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS) $(SNMP_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) test.cc -o $@ $(RGB_LD_FLAGS)

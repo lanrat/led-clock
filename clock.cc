@@ -11,6 +11,7 @@
 #include "brightness.h"
 #include "virtualcanvas.h"
 #include "server.h"
+#include "bandwidth.h"
 
 rgb_matrix::Canvas *matrix;
 rgb_matrix::Font mainFont;
@@ -47,6 +48,17 @@ void updateWeather(){
   while (true) {
     weatherCode = weatherRun();
     usleep(10 * 60 * 1000000);
+  }
+}
+
+bandwidth bw;
+void updateBandwidth() {
+  bandwidthInit();
+
+  while (true) {
+    bw = bandwidthRun();
+    //printf("D:%u U:%u\n", bw.down, bw.up);
+    sleep(3);
   }
 }
 
@@ -137,6 +149,33 @@ void renderWeather(int x, int y) {
   weatherFont.DrawGlyph(matrix, x, y + weatherFont.baseline(), red, &blank, weatherCode);
 }
 
+// TODO more  work here
+void renderBandwidth(int x, int y) {
+  //down
+  u_int dm = bw.down / 1000000;
+  for (u_int i = 0; i < 8; i ++) {
+    if (dm > i) {
+      matrix->SetPixel(x+1, y+8-i, brightness, 0, 0);
+      matrix->SetPixel(x+2, y+8-i, brightness, 0, 0);
+    } else {
+      matrix->SetPixel(x+1, y+8-i, 0, 0, 0);
+      matrix->SetPixel(x+2, y+8-i, 0, 0, 0);
+    }
+  }
+
+  // up
+  u_int um = bw.up / 1000000;
+  for (u_int i = 0; i < 8; i ++) {
+    if (um > i) {
+      matrix->SetPixel(x+4, y+8-i, brightness, 0, 0);
+      matrix->SetPixel(x+5, y+8-i, brightness, 0, 0);
+    } else {
+      matrix->SetPixel(x+4, y+8-i, 0, 0, 0);
+      matrix->SetPixel(x+5, y+8-i, 0, 0, 0);
+    }
+  }
+}
+
 void updateRecieved(char * out) {
   strncpy(data, out, SERVER_BUFFER_SIZE);
   data[SERVER_BUFFER_SIZE-1] = 0;
@@ -171,6 +210,7 @@ void renderUpdate() {
 void run() {
   std::thread muniThread(updateMuni);
   std::thread weatherThread(updateWeather);
+  std::thread bandwidthThread(updateBandwidth);
   std::thread serverThread(setupServer, updateRecieved);
   if (!debug) {
     std::thread brightnessThread(updateBrightness);
@@ -188,6 +228,7 @@ void run() {
     renderClock(0, -1);
     renderWeather(0, 8);
     renderMuni(9, 8);
+    renderBandwidth(56, 8);
 
     usleep(0.5 * 1000000);
   }
