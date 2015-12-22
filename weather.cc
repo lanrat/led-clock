@@ -41,14 +41,18 @@ void weatherInit(){
     }
 }
 
-string weatherRun(){
+int weatherRun(){
     static std::string buffer;
     if (!curlRun(conn, &buffer))
     {
         fprintf(stderr, "Failed to get '%s' [%s]\n", URL, httpErrorBuffer);
     }
     const int code = parseWeather(buffer);
-    string i;
+    if (code == NOT_AVAILABLE) {
+        return 255;
+    }
+    return code;
+    /*
     switch (code) {
         case TORNADO:
         case HURRICANE:
@@ -138,6 +142,5 @@ string weatherRun(){
         default:
             i = "?";
 			break;
-    }
-    return i;
+    }*/
 }

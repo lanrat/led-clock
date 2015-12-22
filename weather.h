@@ -56,5 +56,5 @@
 typedef char weather_icon[8];
 
 
-std::string weatherRun();
+int weatherRun();
 void weatherInit();

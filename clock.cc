@@ -15,6 +15,7 @@
 rgb_matrix::Canvas *matrix;
 rgb_matrix::Font mainFont;
 rgb_matrix::Font updateFont;
+rgb_matrix::Font weatherFont;
 
 unsigned char brightness = 255;
 auto red = rgb_matrix::Color(brightness, 0, 0);
@@ -34,14 +35,17 @@ static void initFonts() {
     fprintf(stderr, "Couldn't load font\n");
     exit(1);
   }
+  if (!weatherFont.LoadFont("weather.bdf")) {
+    fprintf(stderr, "Couldn't load font\n");
+    exit(1);
+  }
 }
 
-const static char * weatherBuffer;
+static int weatherCode = 255;
 void updateWeather(){
   weatherInit();
   while (true) {
-    const auto weather = weatherRun();
-    weatherBuffer = weather.c_str();
+    weatherCode = weatherRun();
     usleep(10 * 60 * 1000000);
   }
 }
@@ -114,8 +118,13 @@ void renderMuni(int x, int y) {
 
   for (int j = 0; (j < 3) && (j + i) < eta.size();  j++) {
     // draw symbol
-    for (int k = 0;  k < eta[i+j].route; k++) {
-      matrix->SetPixel(x, y+k+1, brightness/2, 0, 0);
+    int h = mainFont.height();
+    for (int k = 0; k < h; k++) {
+      if (k < eta[i+j].route) {
+        matrix->SetPixel(x, y+k+1, brightness/2, 0, 0);
+      } else {
+        matrix->SetPixel(x, y+k+1, 0, 0, 0);
+      }
 
     }
     // draw eta
@@ -125,9 +134,8 @@ void renderMuni(int x, int y) {
 }
 
 void renderWeather(int x, int y) {
-  if (weatherBuffer) {
-    rgb_matrix::DrawText(matrix, mainFont, x, y + mainFont.baseline(), red, &blank, weatherBuffer);
-  }
+  weatherFont.DrawGlyph(matrix, x, y + weatherFont.baseline(), red, &blank, weatherCode);
+  //rgb_matrix::DrawText(matrix, mainFont, x, y + weatherFont.baseline(), red, &blank, weatherCode);
 }
 
 void updateRecieved(char * out) {
@@ -149,7 +157,7 @@ void renderUpdate() {
   } else {
     // scroll text
     unsigned int slept = 0;
-    static const int stepDuration = (0.5 * 1000000 / 8);
+    static const int stepDuration = (0.2 * 1000000 / 8);
     while (slept < (newUpdate * 1000000)) {
       for (int i=0;  i < mw+dw; i++) {
         rgb_matrix::DrawText(matrix, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, data);
@@ -180,7 +188,7 @@ void run() {
     
     renderClock(0, -1);
     renderWeather(0, 8);
-    renderMuni(8, 8);
+    renderMuni(9, 8);
 
     usleep(0.5 * 1000000);
   }
