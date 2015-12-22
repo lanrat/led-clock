@@ -135,7 +135,6 @@ void renderMuni(int x, int y) {
 
 void renderWeather(int x, int y) {
   weatherFont.DrawGlyph(matrix, x, y + weatherFont.baseline(), red, &blank, weatherCode);
-  //rgb_matrix::DrawText(matrix, mainFont, x, y + weatherFont.baseline(), red, &blank, weatherCode);
 }
 
 void updateRecieved(char * out) {
