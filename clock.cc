@@ -13,7 +13,7 @@
 #include "server.h"
 #include "bandwidth.h"
 
-rgb_matrix::Canvas *matrix;
+rgb_matrix::RGBMatrix *matrix;
 rgb_matrix::Font mainFont;
 rgb_matrix::Font updateFont;
 rgb_matrix::Font weatherFont;
@@ -58,7 +58,7 @@ void updateBandwidth() {
   while (true) {
     bw = bandwidthRun();
     //printf("D:%u U:%u\n", bw.down, bw.up);
-    sleep(3);
+    sleep(2);
   }
 }
 
@@ -95,7 +95,7 @@ void updateBrightness() {
 }
 
 
-void renderClock(int x, int y) {
+void renderClock(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
   static struct tm * timeinfo;
@@ -107,14 +107,14 @@ void renderClock(int x, int y) {
 
   // clock format
   strftime(buffer,BUFFER_SIZE,"%H:%M",timeinfo);
-  rgb_matrix::DrawText(matrix, mainFont, x, y + mainFont.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(canvas, mainFont, x, y + mainFont.baseline(), red, &blank, buffer);
 
   // date format
   strftime(buffer,BUFFER_SIZE,"%a%e",timeinfo);
-  rgb_matrix::DrawText(matrix, mainFont, x + 35, y + mainFont.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(canvas, mainFont, x + 35, y + mainFont.baseline(), red, &blank, buffer);
 }
 
-void renderMuni(int x, int y) {
+void renderMuni(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
   unsigned int i;
@@ -133,33 +133,34 @@ void renderMuni(int x, int y) {
     int h = mainFont.height();
     for (int k = 0; k < h; k++) {
       if (k < eta[i+j].route) {
-        matrix->SetPixel(x, y+k+1, brightness/2, 0, 0);
+        canvas->SetPixel(x, y+k+1, brightness/2, 0, 0);
       } else {
-        matrix->SetPixel(x, y+k+1, 0, 0, 0);
+        canvas->SetPixel(x, y+k+1, 0, 0, 0);
       }
 
     }
     // draw eta
     snprintf(buffer, BUFFER_SIZE, "%ld ", (eta[i+j].eta - now) / 60);
-    x = x - 3 + rgb_matrix::DrawText(matrix, mainFont, x+1, y + mainFont.baseline(), red, &blank, buffer);
+    x = x - 3 + rgb_matrix::DrawText(canvas, mainFont, x+1, y + mainFont.baseline(), red, &blank, buffer);
   }
 }
 
-void renderWeather(int x, int y) {
-  weatherFont.DrawGlyph(matrix, x, y + weatherFont.baseline(), red, &blank, weatherCode);
+void renderWeather(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+  weatherFont.DrawGlyph(canvas, x, y + weatherFont.baseline(), red, &blank, weatherCode);
 }
 
-// TODO more  work here
-void renderBandwidth(int x, int y) {
+// TODO more work here
+// TODO use log scale?
+void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   //down
   u_int dm = bw.down / 1000000;
   for (u_int i = 0; i < 8; i ++) {
     if (dm > i) {
-      matrix->SetPixel(x+1, y+8-i, brightness, 0, 0);
-      matrix->SetPixel(x+2, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+1, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+2, y+8-i, brightness, 0, 0);
     } else {
-      matrix->SetPixel(x+1, y+8-i, 0, 0, 0);
-      matrix->SetPixel(x+2, y+8-i, 0, 0, 0);
+      canvas->SetPixel(x+1, y+8-i, 0, 0, 0);
+      canvas->SetPixel(x+2, y+8-i, 0, 0, 0);
     }
   }
 
@@ -167,11 +168,11 @@ void renderBandwidth(int x, int y) {
   u_int um = bw.up / 1000000;
   for (u_int i = 0; i < 8; i ++) {
     if (um > i) {
-      matrix->SetPixel(x+4, y+8-i, brightness, 0, 0);
-      matrix->SetPixel(x+5, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+4, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+5, y+8-i, brightness, 0, 0);
     } else {
-      matrix->SetPixel(x+4, y+8-i, 0, 0, 0);
-      matrix->SetPixel(x+5, y+8-i, 0, 0, 0);
+      canvas->SetPixel(x+4, y+8-i, 0, 0, 0);
+      canvas->SetPixel(x+5, y+8-i, 0, 0, 0);
     }
   }
 }
@@ -183,14 +184,16 @@ void updateRecieved(char * out) {
 }
 
 void renderUpdate() {
-  matrix->Clear();
+  rgb_matrix::FrameCanvas *canvas;
   size_t len = strlen(data);
   int mw = matrix->width();
   int dw = updateFont.CharacterWidth('A') * len;
   if (len <= 7) {
     // center text
     int c = (mw - dw) / 2;
-    rgb_matrix::DrawText(matrix, updateFont, c, 1 + updateFont.baseline(), red, &blank, data);
+    canvas = matrix->CreateFrameCanvas();
+    rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, &blank, data);
+    matrix->SwapOnVSync(canvas);
     sleep(newUpdate);
   } else {
     // scroll text
@@ -198,13 +201,14 @@ void renderUpdate() {
     static const int stepDuration = (0.2 * 1000000 / 8);
     while (slept < (newUpdate * 1000000)) {
       for (int i=0;  i < mw+dw; i++) {
-        rgb_matrix::DrawText(matrix, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, data);
+        canvas = matrix->CreateFrameCanvas();
+        rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, data);
+        matrix->SwapOnVSync(canvas);
         usleep(stepDuration);
         slept = slept + stepDuration;
       }
     }
   }
-  matrix->Clear();
 }
 
 void run() {
@@ -217,18 +221,20 @@ void run() {
     brightnessThread.detach();
   }
 
-  matrix->Clear();
+  rgb_matrix::FrameCanvas *canvas;
   while (true) {
-
+    
     if (newUpdate) {
       renderUpdate();
       newUpdate = 0;
     }
-    
-    renderClock(0, -1);
-    renderWeather(0, 8);
-    renderMuni(9, 8);
-    renderBandwidth(56, 8);
+
+    canvas = matrix->CreateFrameCanvas();
+    renderClock(canvas, 0, -1);
+    renderWeather(canvas, 0, 8);
+    renderMuni(canvas, 9, 8);
+    renderBandwidth(canvas, 56, 8);
+    matrix->SwapOnVSync(canvas);
 
     usleep(0.5 * 1000000);
   }
@@ -263,7 +269,8 @@ int main(int argc, char *argv[]) {
     matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
     //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
   } else {
-    matrix = new VirtualCanvas(16, 64);
+    // TODO make virtul canvas extend RGBMatrix (or other calss with CreateFrameCanvas and SwapOnVSync)
+    //matrix = new VirtualCanvas(16, 64);
     printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
   }
 
