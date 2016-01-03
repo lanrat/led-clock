@@ -20,7 +20,6 @@ rgb_matrix::Font weatherFont;
 
 unsigned char brightness = 255;
 auto red = rgb_matrix::Color(brightness, 0, 0);
-auto blank = rgb_matrix::Color(0, 0, 0);
 static bool debug = false;
 char updateString[SERVER_BUFFER_SIZE];
 static unsigned int newUpdate = 0;
@@ -107,11 +106,11 @@ void renderClock(rgb_matrix::FrameCanvas * canvas, int x, int y) {
 
   // clock format
   strftime(buffer,BUFFER_SIZE,"%H:%M",timeinfo);
-  rgb_matrix::DrawText(canvas, mainFont, x, y + mainFont.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(canvas, mainFont, x, y + mainFont.baseline(), red, NULL, buffer);
 
   // date format
   strftime(buffer,BUFFER_SIZE,"%a%e",timeinfo);
-  rgb_matrix::DrawText(canvas, mainFont, x + 35, y + mainFont.baseline(), red, &blank, buffer);
+  rgb_matrix::DrawText(canvas, mainFont, x + 35, y + mainFont.baseline(), red, NULL, buffer);
 }
 
 void renderMuni(rgb_matrix::FrameCanvas * canvas, int x, int y) {
@@ -134,19 +133,16 @@ void renderMuni(rgb_matrix::FrameCanvas * canvas, int x, int y) {
     for (int k = 0; k < h; k++) {
       if (k < eta[i+j].route) {
         canvas->SetPixel(x, y+k+1, brightness/2, 0, 0);
-      } else {
-        canvas->SetPixel(x, y+k+1, 0, 0, 0);
       }
-
     }
     // draw eta
-    snprintf(buffer, BUFFER_SIZE, "%ld ", (eta[i+j].eta - now) / 60);
-    x = x - 3 + rgb_matrix::DrawText(canvas, mainFont, x+1, y + mainFont.baseline(), red, &blank, buffer);
+    snprintf(buffer, BUFFER_SIZE, "%ld", (eta[i+j].eta - now) / 60);
+    x = x + 3 + rgb_matrix::DrawText(canvas, mainFont, x+1, y + mainFont.baseline(), red, NULL, buffer);
   }
 }
 
 void renderWeather(rgb_matrix::FrameCanvas * canvas, int x, int y) {
-  weatherFont.DrawGlyph(canvas, x, y + weatherFont.baseline(), red, &blank, weatherCode);
+  weatherFont.DrawGlyph(canvas, x, y + weatherFont.baseline(), red, NULL, weatherCode);
 }
 
 // TODO more work here
@@ -158,9 +154,6 @@ void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
     if (dm > i) {
       canvas->SetPixel(x+1, y+8-i, brightness, 0, 0);
       canvas->SetPixel(x+2, y+8-i, brightness, 0, 0);
-    } else {
-      canvas->SetPixel(x+1, y+8-i, 0, 0, 0);
-      canvas->SetPixel(x+2, y+8-i, 0, 0, 0);
     }
   }
 
@@ -170,9 +163,6 @@ void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
     if (um > i) {
       canvas->SetPixel(x+4, y+8-i, brightness, 0, 0);
       canvas->SetPixel(x+5, y+8-i, brightness, 0, 0);
-    } else {
-      canvas->SetPixel(x+4, y+8-i, 0, 0, 0);
-      canvas->SetPixel(x+5, y+8-i, 0, 0, 0);
     }
   }
 }
@@ -192,7 +182,7 @@ void renderUpdate() {
     // center text
     int c = (mw - dw) / 2;
     canvas = matrix->CreateFrameCanvas();
-    rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, &blank, updateString);
+    rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, NULL, updateString);
     matrix->SwapOnVSync(canvas);
     sleep(newUpdate);
   } else {
@@ -202,7 +192,7 @@ void renderUpdate() {
     while (slept < (newUpdate * 1000000)) {
       for (int i=0;  i < mw+dw; i++) {
         canvas = matrix->CreateFrameCanvas();
-        rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, updateString);
+        rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, NULL, updateString);
         matrix->SwapOnVSync(canvas);
         usleep(stepDuration);
         slept = slept + stepDuration;
