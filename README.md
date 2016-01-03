@@ -35,6 +35,14 @@ A Raspberry Pi powered LED matrix clock
       ```
 4. Configure Timezone: `dpkg-reconfigure tzdata`
 5. Install required C libs: `apt install libxml2-dev libcurl4-gnutls-dev wiringpi libsnmp-dev`
+6. Clone this repository and matrix submodule
+   ```
+   git clone --recursive https://github.com/lanrat/led-clock.git
+   cd led-clock
+   ```
+7. Compile: `make`
+8. Install systemd init script to start on boot `make install`
+9. Start the clock `make start`
 
 
 ## Weather Font
