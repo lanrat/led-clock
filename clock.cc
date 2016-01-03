@@ -79,9 +79,9 @@ void updateBrightness() {
 
   while (true) {
     a = brightnessGet();
-    if (a < 30) {
+    if (a < 20) {
       brightness = 200;
-    }else if (a < 100) {
+    }else if (a < 250) {
       brightness = 128;
     }else {
       brightness = 64;
