@@ -16,6 +16,8 @@ A Raspberry Pi powered LED matrix clock
 ## Clock Construction
 ### [Album](http://imgur.com/a/v690h)
 
+I used a 64 x 16 red LED Matrix I found on [Ebay](http://www.ebay.com/itm/141637118333).
+
 
 ## Raspberry Pi Setup
 1. Install [Minibian](https://minibianpi.wordpress.com/). (No need for a bloated install with a GUI)
