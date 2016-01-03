@@ -1,10 +1,11 @@
 #ifndef BRIGHT_H
 #define BRIGHT_H
 
-#define SAMPLE_SIZE 10
+#define BRIGHTNESS_SAMPLE_SIZE 5
+#define BRIGHTNESS_MAX_TIME 1
 
 void brightnessInit(int p);
 
-int brightnessGet();
+double brightnessGet();
 
 #endif

@@ -1,5 +1,6 @@
 #include <wiringPi.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "brightness.h"
 
 static int pin;
@@ -12,8 +13,9 @@ void brightnessInit(int p) {
     wiringPiSetupPhys();
 }
 
-int brightnessSample() {
-    int reading = 0;
+double brightnessSample() {
+    struct timeval t1, t2;
+    double elapsedTime;
     
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
@@ -21,23 +23,36 @@ int brightnessSample() {
 
     pinMode(pin, INPUT);
 
+    // start timer
+    gettimeofday(&t1, NULL);
+
     while (digitalRead(pin) == LOW) {
-        reading++;
-        if (reading > 300000) {
+        usleep(100);
+        gettimeofday(&t2, NULL);
+        // if its been more than 1s stop
+        if ((t2.tv_sec - t1.tv_sec) > BRIGHTNESS_MAX_TIME ) {
             break;
         }
+        continue;
     }
+    
+    // stop timer
+    gettimeofday(&t2, NULL);\
 
-    return reading;
+    // compute the elapsed time in millisec
+    elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+    return elapsedTime;
 }
 
-int brightnessGet() {
-    int total = 0;
-    for (int i = 0; i < SAMPLE_SIZE;  i++) {
+double brightnessGet() {
+    double total = 0;
+    for (int i = 0; i < BRIGHTNESS_SAMPLE_SIZE;  i++) {
         //samples[i] = brightnessSample();
         total = total + brightnessSample();
     }
-    int avg = total / SAMPLE_SIZE;
+    double avg = total / BRIGHTNESS_SAMPLE_SIZE;
 
     return avg;
 }

@@ -75,13 +75,13 @@ void updateMuni() {
 
 void updateBrightness() {
   brightnessInit(13);
-  int a;
+  double a;
 
   while (true) {
     a = brightnessGet();
-    if (a < 35000) {
+    if (a < 30) {
       brightness = 200;
-    }else if (a < 90000) {
+    }else if (a < 100) {
       brightness = 128;
     }else {
       brightness = 64;

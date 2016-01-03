@@ -8,7 +8,7 @@ int main(void)
     brightnessInit(13);
     for (;;)
     {
-        printf("%d\n", brightnessGet());
+        printf("%lf\n", brightnessGet());
         sleep(1);
     }
 }
