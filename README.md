@@ -8,8 +8,9 @@ A Raspberry Pi powered LED matrix clock
 * Current time and date (via NTP)
 * Weather (via [Yahoo! weather API](https://developer.yahoo.com/weather/))
 * Next bus ETA (via [NextBus API](https://www.nextbus.com/))
-* Network WAN bandwidth meter (via [DD-WRT SMNP](http://www.dd-wrt.com/wiki/index.php/SNMP))
+* Network WAN bandwidth meter (via [DD-WRT SNMP](http://www.dd-wrt.com/wiki/index.php/SNMP))
 * Web server for displaying scrolling text messages
+* Auto adjusting LED brightness (via photoresistor sensor)
 
 
 ## Clock Construction
@@ -24,14 +25,16 @@ A Raspberry Pi powered LED matrix clock
    1. Install WIFI tools: `apt install iw wpasupplicant`
    2. Edit `/etc/network/interfaces` with network settings:
 
-      ```#auto eth0  
-auto wlan0  
-allow-hotplug wlan0  
-iface wlan0 inet dhcp  
-wpa-ssid "SSID"  
-wpa-psk "PASS"```
-4. Configure Timezone `dpkg-reconfigure tzdata`
-5. Install required C libs `apt install libxml2-dev libcurl4-gnutls-dev wiringpi libsnmp-dev`
+      ```
+      #auto eth0  
+      auto wlan0  
+      allow-hotplug wlan0  
+      iface wlan0 inet dhcp  
+      wpa-ssid "SSID"  
+      wpa-psk "PASS"
+      ```
+4. Configure Timezone: `dpkg-reconfigure tzdata`
+5. Install required C libs: `apt install libxml2-dev libcurl4-gnutls-dev wiringpi libsnmp-dev`
 
 
 ## Weather Font
