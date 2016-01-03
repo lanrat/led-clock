@@ -2,3 +2,4 @@ clock
 test
 photo
 *.o
+*.log
