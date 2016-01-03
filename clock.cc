@@ -257,12 +257,11 @@ int main(int argc, char *argv[]) {
     int chain = 2;    // Number of boards chained together.
     int parallel = 1; // Number of chains (must be 1 on origional Pi)
     matrix = new rgb_matrix::RGBMatrix(&io, rows, chain, parallel);
-    //printf("r: %d, c: %d, p: %d\n", rows, chain, parallel);
   } else {
     // TODO make virtul canvas extend RGBMatrix (or other calss with CreateFrameCanvas and SwapOnVSync)
     //matrix = new VirtualCanvas(16, 64);
-    printf("%dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
   }
+  printf("Matrix %dx%d=%d\n",  matrix->width(), matrix->height(), matrix->width() * matrix->height());
 
   showLoading(0);
   initFonts();
