@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <math.h>
+#include <cmath>
 #include <string.h>
 #include <stdio.h>
 #include <cstdio>
@@ -57,7 +57,7 @@ void updateBandwidth() {
   while (true) {
     bw = bandwidthRun();
     //printf("D:%u U:%u\n", bw.down, bw.up);
-    sleep(2);
+    sleep(1);
   }
 }
 
@@ -145,24 +145,28 @@ void renderWeather(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   weatherFont.DrawGlyph(canvas, x, y + weatherFont.baseline(), red, NULL, weatherCode);
 }
 
-// TODO more work here
-// TODO use log scale?
+// TODO could make bandwith iterate over each bar column (thickness)
 void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+  // y=log2(x*2)+1
   //down
-  u_int dm = bw.down / 1000000;
+  u_int dm = log2(((bw.down / 1000000) * 8) * 2 ) + 1; //converting to megabits
   for (u_int i = 0; i < 8; i ++) {
     if (dm > i) {
+      canvas->SetPixel(x,   y+8-i, brightness, 0, 0);
       canvas->SetPixel(x+1, y+8-i, brightness, 0, 0);
       canvas->SetPixel(x+2, y+8-i, brightness, 0, 0);
+      //canvas->SetPixel(x+3, y+8-i, brightness, 0, 0);
     }
   }
 
   // up
-  u_int um = bw.up / 1000000;
+  u_int um = log2(((bw.up / 1000000) * 8) * 2 ) + 1; //converting to megabits
   for (u_int i = 0; i < 8; i ++) {
     if (um > i) {
-      canvas->SetPixel(x+4, y+8-i, brightness, 0, 0);
+      //canvas->SetPixel(x+4, y+8-i, brightness, 0, 0);
       canvas->SetPixel(x+5, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+6, y+8-i, brightness, 0, 0);
+      canvas->SetPixel(x+7, y+8-i, brightness, 0, 0);
     }
   }
 }
@@ -226,7 +230,7 @@ void run() {
     renderBandwidth(canvas, 56, 8);
     matrix->SwapOnVSync(canvas);
 
-    usleep(0.5 * 1000000);
+    usleep(0.3 * 1000000);
   }
 
 }
