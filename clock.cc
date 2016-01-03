@@ -22,7 +22,7 @@ unsigned char brightness = 255;
 auto red = rgb_matrix::Color(brightness, 0, 0);
 auto blank = rgb_matrix::Color(0, 0, 0);
 static bool debug = false;
-char data[SERVER_BUFFER_SIZE];
+char updateString[SERVER_BUFFER_SIZE];
 static unsigned int newUpdate = 0;
 
 #define BUFFER_SIZE 80 
@@ -178,21 +178,21 @@ void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
 }
 
 void updateRecieved(char * out) {
-  strncpy(data, out, SERVER_BUFFER_SIZE);
-  data[SERVER_BUFFER_SIZE-1] = 0;
+  strncpy(updateString, out, SERVER_BUFFER_SIZE);
+  updateString[SERVER_BUFFER_SIZE-1] = 0;
   newUpdate = 10;
 }
 
 void renderUpdate() {
   rgb_matrix::FrameCanvas *canvas;
-  size_t len = strlen(data);
+  size_t len = strlen(updateString);
   int mw = matrix->width();
   int dw = updateFont.CharacterWidth('A') * len;
   if (len <= 7) {
     // center text
     int c = (mw - dw) / 2;
     canvas = matrix->CreateFrameCanvas();
-    rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, &blank, data);
+    rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, &blank, updateString);
     matrix->SwapOnVSync(canvas);
     sleep(newUpdate);
   } else {
@@ -202,7 +202,7 @@ void renderUpdate() {
     while (slept < (newUpdate * 1000000)) {
       for (int i=0;  i < mw+dw; i++) {
         canvas = matrix->CreateFrameCanvas();
-        rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, data);
+        rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, &blank, updateString);
         matrix->SwapOnVSync(canvas);
         usleep(stepDuration);
         slept = slept + stepDuration;
