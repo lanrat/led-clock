@@ -30,6 +30,7 @@ static int parseWeather(string buffer) {
     auto weatherPtr = (char*)xmlGetProp(cur, (const xmlChar*)"code");
     auto weather = string(weatherPtr);
     xmlFree(weatherPtr);
+    xmlFreeDoc(doc);
     return atoi(weather.c_str());
 }
 
