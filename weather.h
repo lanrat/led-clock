@@ -57,4 +57,8 @@ typedef char weather_icon[8];
 
 
 int weatherRun();
+
 void weatherInit();
+
+
+void weatherCleanup();

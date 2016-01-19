@@ -48,6 +48,7 @@ void updateWeather(){
     weatherCode = weatherRun();
     usleep(10 * 60 * 1000000);
   }
+  weatherCleanup();
 }
 
 bandwidth bw;
@@ -69,7 +70,6 @@ void updateMuni() {
     eta = muniRun();
     usleep(3 * 60 * 1000000);
   }
-
   muniCleanup();
 }
 
@@ -177,17 +177,16 @@ void updateRecieved(char * out) {
   newUpdate = 10;
 }
 
-void renderUpdate() {
-  rgb_matrix::FrameCanvas *canvas;
+void renderUpdate(rgb_matrix::FrameCanvas * canvas) {
   size_t len = strlen(updateString);
   int mw = matrix->width();
   int dw = updateFont.CharacterWidth('A') * len;
   if (len <= 7) {
     // center text
     int c = (mw - dw) / 2;
-    canvas = matrix->CreateFrameCanvas();
     rgb_matrix::DrawText(canvas, updateFont, c, 1 + updateFont.baseline(), red, NULL, updateString);
-    matrix->SwapOnVSync(canvas);
+    canvas = matrix->SwapOnVSync(canvas);
+    canvas->Clear();
     sleep(newUpdate);
   } else {
     // scroll text
@@ -195,9 +194,9 @@ void renderUpdate() {
     static const int stepDuration = (0.2 * 1000000 / 8);
     while (slept < (newUpdate * 1000000)) {
       for (int i=0;  i < mw+dw; i++) {
-        canvas = matrix->CreateFrameCanvas();
         rgb_matrix::DrawText(canvas, updateFont, mw-i, 1 + updateFont.baseline(), red, NULL, updateString);
-        matrix->SwapOnVSync(canvas);
+        canvas = matrix->SwapOnVSync(canvas);
+        canvas->Clear();
         usleep(stepDuration);
         slept = slept + stepDuration;
       }
@@ -216,19 +215,18 @@ void run() {
   }
 
   rgb_matrix::FrameCanvas *canvas;
+  canvas = matrix->CreateFrameCanvas();
   while (true) {
-    
     if (newUpdate) {
-      renderUpdate();
+      renderUpdate(canvas);
       newUpdate = 0;
     }
-
-    canvas = matrix->CreateFrameCanvas();
     renderClock(canvas, 0, -1);
     renderWeather(canvas, 0, 8);
     renderMuni(canvas, 9, 8);
     renderBandwidth(canvas, 56, 8);
-    matrix->SwapOnVSync(canvas);
+    canvas = matrix->SwapOnVSync(canvas);
+    canvas->Clear();
 
     usleep(0.3 * 1000000);
   }

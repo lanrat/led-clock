@@ -42,6 +42,11 @@ void weatherInit(){
     }
 }
 
+void weatherCleanup() {
+    xmlCleanupParser();
+    curlCleanup(conn);
+}
+
 int weatherRun(){
     static std::string buffer;
     if (!curlRun(conn, &buffer))
