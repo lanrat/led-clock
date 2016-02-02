@@ -17,6 +17,7 @@ rgb_matrix::RGBMatrix *matrix;
 rgb_matrix::Font mainFont;
 rgb_matrix::Font updateFont;
 rgb_matrix::Font weatherFont;
+rgb_matrix::FrameCanvas *canvas;
 
 unsigned char brightness = 255;
 auto red = rgb_matrix::Color(brightness, 0, 0);
@@ -98,7 +99,7 @@ void updateBrightness() {
 }
 
 
-void renderClock(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+void renderClock(int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
   static struct tm * timeinfo;
@@ -117,7 +118,7 @@ void renderClock(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   rgb_matrix::DrawText(canvas, mainFont, x + 35, y + mainFont.baseline(), red, NULL, buffer);
 }
 
-void renderMuni(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+void renderMuni(int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
   unsigned int i;
@@ -145,12 +146,12 @@ void renderMuni(rgb_matrix::FrameCanvas * canvas, int x, int y) {
   }
 }
 
-void renderWeather(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+void renderWeather(int x, int y) {
   weatherFont.DrawGlyph(canvas, x, y + weatherFont.baseline(), red, NULL, weatherCode);
 }
 
 // TODO could make bandwith iterate over each bar column (thickness)
-void renderBandwidth(rgb_matrix::FrameCanvas * canvas, int x, int y) {
+void renderBandwidth(int x, int y) {
   // y=log2(x*2)+1
   //down
   u_int dm = log2(((bw.down / 1000000) * 8) * 2 ) + 1; //converting to megabits
@@ -181,7 +182,7 @@ void updateRecieved(char * out) {
   newUpdate = 10;
 }
 
-void renderUpdate(rgb_matrix::FrameCanvas * canvas) {
+void renderUpdate() {
   size_t len = strlen(updateString);
   int mw = matrix->width();
   int dw = updateFont.CharacterWidth('A') * len;
@@ -218,17 +219,16 @@ void run() {
     brightnessThread.detach();
   }
 
-  rgb_matrix::FrameCanvas *canvas;
   canvas = matrix->CreateFrameCanvas();
   while (true) {
     if (newUpdate) {
-      renderUpdate(canvas);
+      renderUpdate();
       newUpdate = 0;
     }
-    renderClock(canvas, 0, -1);
-    renderWeather(canvas, 0, 8);
-    renderMuni(canvas, 9, 8);
-    renderBandwidth(canvas, 56, 8);
+    renderClock(0, -1);
+    renderWeather(0, 8);
+    renderMuni(9, 8);
+    renderBandwidth(56, 8);
     canvas = matrix->SwapOnVSync(canvas);
     canvas->Clear();
 
