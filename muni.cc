@@ -129,7 +129,7 @@ muniETA muniRun()
     }
 
     static std::string bufferN_OWL;
-    if (!curlRun(connNX, &bufferN_OWL))
+    if (!curlRun(connN_OWL, &bufferN_OWL))
     {
         fprintf(stderr, "Failed to get '%s' [%s]\n", URL_N_OWL, httpErrorBuffer);
     }
