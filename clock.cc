@@ -79,11 +79,15 @@ void updateBrightness() {
 
   while (true) {
     a = brightnessGet();
-    if (a < 20) {
+    // get time sample
+    if (a < 10) {
+      // bright
       brightness = 200;
-    }else if (a < 250) {
+    }else if (a < 100) {
+      // medium
       brightness = 128;
     }else {
+      // dim
       brightness = 64;
     }
 
