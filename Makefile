@@ -47,7 +47,7 @@ bandwidth.o: bandwidth.cc bandwidth.h
 server.o: server.cc server.h
 	$(CXX) $(CXXFLAGS) -c server.cc
 
-clock: stop http.o muni.o brightness.o weather.o virtualcanvas.o server.o bandwidth.o clock.cc $(RGB_LIBRARY)
+clock: http.o muni.o brightness.o weather.o virtualcanvas.o server.o bandwidth.o clock.cc $(RGB_LIBRARY)
 	$(CXX) $(CXXFLAGS) $(RGB_INC_FLAGS) http.o weather.o virtualcanvas.o muni.o brightness.o bandwidth.o server.o clock.cc -o $@ $(RGB_LD_FLAGS) $(XML_LD_FLAGS) $(CURL_LD_FLAGS) $(GPIO_LD_FLAGS) $(SNMP_LD_FLAGS)
 
 test: test.cc $(RGB_LIBRARY)
