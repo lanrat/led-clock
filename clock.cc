@@ -152,26 +152,32 @@ void renderWeather(int x, int y) {
 
 // TODO could make bandwith iterate over each bar column (thickness)
 void renderBandwidth(int x, int y) {
-  // y=log2(x*2)+1
-  //down
-  u_int dm = log2(((bw.down / 1000000) * 8) * 2 ) + 1; //converting to megabits
-  for (u_int i = 0; i < 8; i ++) {
-    if (dm > i) {
-      canvas->SetPixel(x,   y+8-i, brightness, 0, 0);
-      canvas->SetPixel(x+1, y+8-i, brightness, 0, 0);
-      canvas->SetPixel(x+2, y+8-i, brightness, 0, 0);
-      //canvas->SetPixel(x+3, y+8-i, brightness, 0, 0);
+  //converting to megabits
+  //u_int dm = (bw.down / 1000000) * 8);
+
+  // scale
+  u_int d = log2(bw.down * 8); // convert to bps
+
+  // draw bandwith on a scape of 0-32 (bars 8 high by 4 wide)
+  for (u_int w = 0; w < 4; w++) {
+    for (u_int h = 0; h < 8; h++) {
+      if (d > 0) {
+        canvas->SetPixel(x+w, y+8-h, brightness, 0, 0);
+        d--;
+      }
     }
   }
 
-  // up
-  u_int um = log2(((bw.up / 1000000) * 8) * 2 ) + 1; //converting to megabits
-  for (u_int i = 0; i < 8; i ++) {
-    if (um > i) {
-      //canvas->SetPixel(x+4, y+8-i, brightness, 0, 0);
-      canvas->SetPixel(x+5, y+8-i, brightness, 0, 0);
-      canvas->SetPixel(x+6, y+8-i, brightness, 0, 0);
-      canvas->SetPixel(x+7, y+8-i, brightness, 0, 0);
+  // scale
+  u_int u = log2(bw.up * 8); // convert to bps
+
+  // draw bandwith on a scape of 0-32 (bars 8 high by 4 wide)
+  for (u_int w = 0; w < 4; w++) {
+    for (u_int h = 0; h < 8; h++) {
+      if (u > 0) {
+        canvas->SetPixel(x+w+5, y+8-h, brightness, 0, 0);
+        u--;
+      }
     }
   }
 }
@@ -228,7 +234,7 @@ void run() {
     renderClock(0, -1);
     renderWeather(0, 8);
     renderMuni(9, 8);
-    renderBandwidth(56, 8);
+    renderBandwidth(54, 8); // shift left 2
     canvas = matrix->SwapOnVSync(canvas);
     canvas->Clear();
 
