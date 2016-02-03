@@ -156,7 +156,7 @@ void renderBandwidth(int x, int y) {
   //u_int dm = (bw.down / 1000000) * 8);
 
   // scale
-  u_int d = log2(bw.down * 8); // convert to bps
+  u_int d = log2(bw.down * 8)-7; // convert to bps
 
   // draw bandwith on a scape of 0-32 (bars 8 high by 4 wide)
   for (u_int w = 0; w < 4; w++) {
@@ -169,7 +169,7 @@ void renderBandwidth(int x, int y) {
   }
 
   // scale
-  u_int u = log2(bw.up * 8); // convert to bps
+  u_int u = log2(bw.up * 8)-7; // convert to bps
 
   // draw bandwith on a scape of 0-32 (bars 8 high by 4 wide)
   for (u_int w = 0; w < 4; w++) {
