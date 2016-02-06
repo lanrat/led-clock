@@ -14,6 +14,7 @@ static CURL *conn;
 
 static int parseWeather(string buffer) {
     const auto doc = xmlParseMemory (buffer.c_str(), buffer.size());
+    int code = 255;
     if (doc == NULL) {
         fprintf(stderr,"Document not parsed successfully. \n");
         return -1;
@@ -28,10 +29,14 @@ static int parseWeather(string buffer) {
         cur = cur->next;
     }
     auto weatherPtr = (char*)xmlGetProp(cur, (const xmlChar*)"code");
-    auto weather = string(weatherPtr);
+    if (weatherPtr != NULL) {
+        auto weather = string(weatherPtr);
+        code = atoi(weather.c_str());
+    }
+    
     xmlFree(weatherPtr);
     xmlFreeDoc(doc);
-    return atoi(weather.c_str());
+    return code;
 }
 
 void weatherInit(){
