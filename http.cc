@@ -62,6 +62,13 @@ bool curlInit(CURL *&conn, const char *url)
         return false;
     }
 
+    code = curl_easy_setopt(conn, CURLOPT_TIMEOUT_MS, 60000L); // 1 minute
+    if (code != CURLE_OK)
+    {
+        fprintf(stderr, "Failed to set timeout [%s]\n", httpErrorBuffer);
+        return false;
+    }
+
     return true;
 }
 
