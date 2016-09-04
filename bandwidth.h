@@ -12,8 +12,8 @@
 #define COMMUNITY "public"
 
 struct bandwidth {
-    u_int down;
-    u_int up;
+    u_int down; // bytes/sec
+    u_int up; // bytes/sec
 };
 
 void bandwidthInit();
