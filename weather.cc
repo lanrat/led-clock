@@ -7,7 +7,7 @@
 #include "weather.h"
 
 // "select * from weather.forecast where woeid in (select woeid from geo.places(1) where text="sanfrancisco, ca")&format=xml"
-static auto URL = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%2294121%22)&format=xml";
+static auto URL = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%2294105%22)&format=xml";
 
 
 using namespace std;
