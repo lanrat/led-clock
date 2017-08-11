@@ -10,13 +10,22 @@
 #include "http.h"
 #include "muni.h"
 
-
+/*
 static auto URL_N = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N&s=5200";
 static auto URL_NX = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=NX&s=5200";
 static auto URL_N_OWL = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=N_OWL&s=5200";
-static CURL *connN;
-static CURL *connNX;
-static CURL *connN_OWL;
+*/
+
+/* 38R
+ * 38AX
+ * 38BX
+ */
+static auto URL1 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38R&s=4270";
+static auto URL2 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38AX&s=4270";
+static auto URL3 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38BX&s=4270";
+static CURL *conn1;
+static CURL *conn2;
+static CURL *conn3;
 
 
 static bool eta_cmp(const arrivalETA& a, const arrivalETA& b)
@@ -96,17 +105,17 @@ void muniInit()
      */
     LIBXML_TEST_VERSION
 
-    if (!curlInit(connN, URL_N))
+    if (!curlInit(conn1, URL1))
     {
         fprintf(stderr, "Connection initializion failed\n");
         exit(1);
     }
-    if (!curlInit(connNX, URL_NX))
+    if (!curlInit(conn2, URL2))
     {
         fprintf(stderr, "Connection initializion failed\n");
         exit(1);
     }
-    if (!curlInit(connN_OWL, URL_N_OWL))
+    if (!curlInit(conn3, URL3))
     {
         fprintf(stderr, "Connection initializion failed\n");
         exit(1);
@@ -116,36 +125,36 @@ void muniInit()
 muniETA muniRun()
 {
     // Retrieve content for the URL
-    static std::string bufferN;
-    if (!curlRun(connN, &bufferN))
+    static std::string buffer1;
+    if (!curlRun(conn1, &buffer1))
     {
-        fprintf(stderr, "Failed to get '%s' [%s]\n", URL_N, httpErrorBuffer);
+        fprintf(stderr, "Failed to get '%s' [%s]\n", URL1, httpErrorBuffer);
     }
 
-    static std::string bufferNX;
-    if (!curlRun(connNX, &bufferNX))
+    static std::string buffer2;
+    if (!curlRun(conn2, &buffer2))
     {
-        fprintf(stderr, "Failed to get '%s' [%s]\n", URL_NX, httpErrorBuffer);
+        fprintf(stderr, "Failed to get '%s' [%s]\n", URL2, httpErrorBuffer);
     }
 
-    static std::string bufferN_OWL;
-    if (!curlRun(connN_OWL, &bufferN_OWL))
+    static std::string buffer3;
+    if (!curlRun(conn3, &buffer3))
     {
-        fprintf(stderr, "Failed to get '%s' [%s]\n", URL_N_OWL, httpErrorBuffer);
+        fprintf(stderr, "Failed to get '%s' [%s]\n", URL3, httpErrorBuffer);
     }
 
-    auto N = parseMuniXML(bufferN);
-    auto NX = parseMuniXML(bufferNX);
-    auto N_OWL = parseMuniXML(bufferN_OWL);
+    auto eta1 = parseMuniXML(buffer1);
+    auto eta2 = parseMuniXML(buffer2);
+    auto eta3 = parseMuniXML(buffer3);
     muniETA eta;
 
-    for(auto it = N.begin(); it != N.end(); ++it) {
+    for(auto it = eta1.begin(); it != eta1.end(); ++it) {
         eta.push_back((arrivalETA){*it,1});
     }
-    for(auto it = NX.begin(); it != NX.end(); ++it) {
+    for(auto it = eta2.begin(); it != eta2.end(); ++it) {
         eta.push_back((arrivalETA){*it,2});
     }
-    for(auto it = N_OWL.begin(); it != N_OWL.end(); ++it) {
+    for(auto it = eta3.begin(); it != eta3.end(); ++it) {
         eta.push_back((arrivalETA){*it,3});
     }
 
@@ -157,7 +166,7 @@ muniETA muniRun()
 void muniCleanup()
 {
     xmlCleanupParser();
-    curlCleanup(connN);
-    curlCleanup(connNX);
-    curlCleanup(connN_OWL);
+    curlCleanup(conn1);
+    curlCleanup(conn2);
+    curlCleanup(conn3);
 }

@@ -121,6 +121,7 @@ void renderClock(int x, int y) {
 void renderMuni(int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
+  static const int displayNum = 4;
   unsigned int i;
   time(&now);
 
@@ -132,7 +133,7 @@ void renderMuni(int x, int y) {
     }
   }
 
-  for (int j = 0; (j < 3) && (j + i) < eta.size();  j++) {
+  for (int j = 0; (j < displayNum) && (j + i) < eta.size();  j++) {
     // draw symbol
     int h = mainFont.height();
     for (int k = 0; k < h; k++) {
