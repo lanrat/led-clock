@@ -121,7 +121,7 @@ void renderClock(int x, int y) {
 void renderMuni(int x, int y) {
   static char buffer[BUFFER_SIZE];
   static time_t now;
-  static const int displayNum = 4;
+  static const int displayNum = 3;
   unsigned int i;
   time(&now);
 
