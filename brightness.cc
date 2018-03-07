@@ -51,6 +51,7 @@ double brightnessGet() {
     for (int i = 0; i < BRIGHTNESS_SAMPLE_SIZE;  i++) {
         //samples[i] = brightnessSample();
         total = total + brightnessSample();
+        usleep(100);
     }
     double avg = total / BRIGHTNESS_SAMPLE_SIZE;
 

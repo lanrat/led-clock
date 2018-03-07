@@ -20,9 +20,9 @@ static auto URL_N_OWL = "http://webservices.nextbus.com/service/publicXMLFeed?co
  * 38AX
  * 38BX
  */
-static auto URL1 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38R&s=4270";
-static auto URL2 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38AX&s=4270";
-static auto URL3 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38BX&s=4270";
+static auto URL1 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38&s=4279";
+static auto URL2 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38R&s=4279";
+static auto URL3 = "http://webservices.nextbus.com/service/publicXMLFeed?command=predictions&a=sf-muni&r=38AX&s=4279";
 static CURL *conn1;
 static CURL *conn2;
 static CURL *conn3;

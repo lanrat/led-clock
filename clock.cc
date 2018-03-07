@@ -19,7 +19,7 @@ rgb_matrix::Font updateFont;
 rgb_matrix::Font weatherFont;
 rgb_matrix::FrameCanvas *canvas;
 
-unsigned char brightness = 255;
+unsigned char brightness = 128;
 auto red = rgb_matrix::Color(brightness, 0, 0);
 static bool debug = false;
 char updateString[SERVER_BUFFER_SIZE];
@@ -83,13 +83,13 @@ void updateBrightness() {
     // get time sample
     if (a < 10) {
       // bright
-      brightness = 200;
+      brightness = 128;
     }else if (a < 100) {
       // medium
-      brightness = 128;
+      brightness = 64;
     }else {
       // dim
-      brightness = 64;
+      brightness = 32;
     }
 
     red = rgb_matrix::Color(brightness, 0, 0);
