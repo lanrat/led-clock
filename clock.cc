@@ -218,7 +218,7 @@ void renderUpdate() {
 
 void run() {
   std::thread muniThread(updateMuni);
-  std::thread weatherThread(updateWeather);
+  //std::thread weatherThread(updateWeather);
   std::thread bandwidthThread(updateBandwidth);
   std::thread serverThread(setupServer, updateRecieved);
   if (!debug) {
@@ -233,7 +233,7 @@ void run() {
       newUpdate = 0;
     }
     renderClock(0, -1);
-    renderWeather(0, 8);
+    //renderWeather(0, 8);
     renderMuni(9, 8);
     renderBandwidth(54, 8); // shift left 2
     canvas = matrix->SwapOnVSync(canvas);

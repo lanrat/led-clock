@@ -42,6 +42,7 @@ I used a 64 x 16 red LED Matrix I found on [Ebay](http://www.ebay.com/itm/141637
     ```
     git clone --recursive https://github.com/lanrat/led-clock.git
     cd led-clock
+    apt-get install libcurl4-openssl-dev libxml2-dev wiringpi libsnmp-dev snmp
     ```
 7. Compile: `make` (this may take over a minute the first time)
 8. Install systemd init script to start on boot `make install`
